@@ -5,24 +5,26 @@
 
 class ILogObserver {
 public:
-	virtual void OnLog(const char* msg) = 0;
+	virtual void OnLog(PCTSTR msg) = 0;
 	virtual ~ILogObserver() {}
 };
 
 class DriverLoader
 {
 public:
-	void SetPath(const char* drivername, const char* svcname);
-	bool Load(const char* drivername = nullptr, const char* svcname = nullptr);
-	bool Start(const char* svcname = nullptr);
-	bool Stop(const char* svcname = nullptr);
-	bool Unload(const char* svcname = nullptr);
+	void SetPath(PCTSTR drivername, PCTSTR svcname);
+	bool Load(PCTSTR drivername = nullptr, PCTSTR svcname = nullptr);
+	bool Start(PCTSTR svcname = nullptr);
+	bool Stop(PCTSTR svcname = nullptr);
+	bool Unload(PCTSTR svcname = nullptr);
+    bool Open(PCTSTR linkname);
 
-	const char* m_driverName;
-	const char* m_serviceName;
+	PCTSTR m_driverName;
+	PCTSTR m_serviceName;
+    HANDLE m_hDriver;
 
-	void Log(const char* fmt, ...);
-	void LogErr(const char* prefix);
+	void Log(PCTSTR fmt, ...);  //继承ILogObserver 重写OnLog 打印日志
+	void LogErr(PCTSTR prefix);
 	void SetLogObserver(ILogObserver* pObs) { m_pObs = pObs; }
 	ILogObserver* m_pObs = nullptr;
 };

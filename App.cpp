@@ -3,14 +3,24 @@
 void App::Render()
 {
     SetDockingWnd(0);
+
     RenderMenuBar();
-    RenderProcessWnd();
-    RenderModuleWnd();
-    RenderKernelWnd();
-    RenderRegeditWnd();
-    RenderNetWnd();
-    RenderFileWnd();
+
+    if (Ctx.show_process_wnd)
+        processWnd.Render(&Ctx.show_process_wnd);
+    if (Ctx.show_module_wnd)
+        moduleWnd.Render(&Ctx.show_module_wnd);
+    if (Ctx.show_kernel_wnd)
+        kernelWnd.Render(&Ctx.show_kernel_wnd);
+    if (Ctx.show_regedit_wnd)
+        regeditWnd.Render(&Ctx.show_regedit_wnd);
+    if (Ctx.show_net_wnd)
+        netWnd.Render(&Ctx.show_net_wnd);
+    if (Ctx.show_file_wnd)
+        fileWnd.Render(&Ctx.show_file_wnd);
+
     ImGui::ShowStyleEditor();
+
     ImGui::End();
 }
 
@@ -72,81 +82,80 @@ void App::RenderMenuBar()
             ImGui::MenuItem("注册表面板", nullptr, &Ctx.show_regedit_wnd);
             ImGui::EndMenu();
         }
+
+        if (ImGui::BeginMenu("驱动"))
+        {
+            if (ImGui::MenuItem("SetPath")) {
+                // 调用 SetPath
+            }
+            if (ImGui::MenuItem("Load")) {
+                // 调用 Load
+            }
+            if (ImGui::MenuItem("Start")) {
+                // 调用 Start
+            }
+            if (ImGui::MenuItem("Open")) {
+                // 调用 Open
+            }
+            if (ImGui::MenuItem("Stop/Unload")) {
+                // 调用 Stop/Unload
+            }
+            ImGui::EndMenu();
+        }
+
         ImGui::EndMenuBar();
     }
+
+
 }
 
-void App::RefreshProcessList() {
-    PROCESS_INFO buf[60] = { 0 };
-    if (arkR3->EnumProcess(buf, 60)) {
-        Ctx.list.clear();
-        Ctx.list.assign(buf, buf + 60);
+void App::test() {
+
+    int count =60; 
+    auto* pInfo = arkR3.GetProcessInfo(count); 
+
+    Ctx.list.clear();
+    for (int i = 0; i < count; ++i) {
+        PROCESS_INFO info;
+        strcpy_s(info.Name, pInfo[i].Name);
+        info.Id = pInfo[i].Id;
+        info.ParentId = pInfo[i].ParentId;
+        info.Cpu = pInfo[i].Cpu;
+        strcpy_s(info.Path, pInfo[i].Path);
+        Ctx.list.push_back(info);
     }
+    free(pInfo); 
 }
 
 void App::RenderProcessWnd()
 {
-    ImGui::Begin("进程", &Ctx.show_process_wnd);
-
-    ImGui::Columns(5, "proc_columns");
-    ImGui::Text("进程名"); ImGui::NextColumn();
-    ImGui::Text("PID");    ImGui::NextColumn();
-    ImGui::Text("父PID");  ImGui::NextColumn();
-    ImGui::Text("CPU");    ImGui::NextColumn();
-    ImGui::Text("路径");   ImGui::NextColumn();
-    ImGui::Separator();
-
-
-    for (const auto& proc : Ctx.list) {
-        ImGui::Text("%s", proc.Name); ImGui::NextColumn();
-        ImGui::Text("%u", proc.Id);   ImGui::NextColumn();
-        ImGui::Text("%u", proc.ParentId); ImGui::NextColumn();
-        ImGui::Text("%.2f", proc.Cpu);    ImGui::NextColumn();
-        ImGui::Text("%s", proc.Path); ImGui::NextColumn();
-    }
-    ImGui::Columns(1);
-
-    // 可选：刷新按钮
-    if (ImGui::Button("刷新")) {
-        RefreshProcessList();
-    }
-    ImGui::End();
+  
 }
 
 void App::RenderModuleWnd()
 {
 
-    ImGui::Begin("模块", &Ctx.show_module_wnd);
-    ImGui::Text("这里显示模块相关信息。");
-    ImGui::End();
+    
 }
 
 void App::RenderKernelWnd()
 {
-    ImGui::Begin("内核", &Ctx.show_kernel_wnd);
-    ImGui::Text("这里显示内核相关信息。");
-    ImGui::End();
+   
 }
 
 void App::RenderRegeditWnd()
 {
-    ImGui::Begin("注册表", &Ctx.show_regedit_wnd);
-    ImGui::Text("这里显示注册表相关信息。");
-    ImGui::End();
+
 }
 
 void App::RenderFileWnd()
 {
-    ImGui::Begin("文件", &Ctx.show_file_wnd);
-    ImGui::Text("这里显示文件表相关信息。");
-    ImGui::End();
+
 }
 
 void App::RenderNetWnd()
 {
-    ImGui::Begin("网络", &Ctx.show_net_wnd);
-    ImGui::Text("这里显示Net相关信息。");
-    ImGui::End();
+
 }
 
 

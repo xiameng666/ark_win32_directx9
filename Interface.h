@@ -9,10 +9,12 @@
 #include <GL/GL.h>
 #include <tchar.h>
 
+#include <vector>
+#include "../include/proto.h"
+
+
+
 class ImguiWnd {
 public:
     virtual void Render(bool* p_open = nullptr) = 0;
-    //virtual bool IsVisible() const = 0;
-    //virtual void SetVisible(bool visible) = 0;
 };
-

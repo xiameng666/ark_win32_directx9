@@ -52,6 +52,24 @@
     <ClCompile Include="driverloader.cpp">
       <Filter>DriverLoad</Filter>
     </ClCompile>
+    <ClCompile Include="ProcessWnd.cpp">
+      <Filter>Ark\Wnd</Filter>
+    </ClCompile>
+    <ClCompile Include="KernelWnd.cpp">
+      <Filter>Ark\Wnd</Filter>
+    </ClCompile>
+    <ClCompile Include="ModuleWnd.cpp">
+      <Filter>Ark\Wnd</Filter>
+    </ClCompile>
+    <ClCompile Include="NetWnd.cpp">
+      <Filter>Ark\Wnd</Filter>
+    </ClCompile>
+    <ClCompile Include="RegeditWnd.cpp">
+      <Filter>Ark\Wnd</Filter>
+    </ClCompile>
+    <ClCompile Include="FileWnd.cpp">
+      <Filter>Ark\Wnd</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\imconfig.h">
@@ -83,6 +101,24 @@
     </ClInclude>
     <ClInclude Include="driverloader.h">
       <Filter>DriverLoad</Filter>
+    </ClInclude>
+    <ClInclude Include="ProcessWnd.h">
+      <Filter>Ark\Wnd</Filter>
+    </ClInclude>
+    <ClInclude Include="KernelWnd.h">
+      <Filter>Ark\Wnd</Filter>
+    </ClInclude>
+    <ClInclude Include="ModuleWnd.h">
+      <Filter>Ark\Wnd</Filter>
+    </ClInclude>
+    <ClInclude Include="NetWnd.h">
+      <Filter>Ark\Wnd</Filter>
+    </ClInclude>
+    <ClInclude Include="RegeditWnd.h">
+      <Filter>Ark\Wnd</Filter>
+    </ClInclude>
+    <ClInclude Include="FileWnd.h">
+      <Filter>Ark\Wnd</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

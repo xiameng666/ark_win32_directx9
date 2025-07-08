@@ -1,11 +1,14 @@
 ﻿#pragma once
-#include "imgui.h"
-#include "imgui_impl_dx9.h"
-#include "imgui_impl_win32.h"
-#include <d3d9.h>
-#include <tchar.h>
+#include"Interface.h"
+
 #include "ArkR3.h"
-#include <vector>
+
+#include "ProcessWnd.h"
+#include "ModuleWnd.h"
+#include "KernelWnd.h"
+#include "RegeditWnd.h"
+#include "FileWnd.h"
+#include "NetWnd.h"
 
 struct Context {
     bool show_process_wnd = true;
@@ -16,11 +19,20 @@ struct Context {
     bool show_file_wnd = true;
     bool show_net_wnd = true;
 
-    std::vector<PROCESS_INFO> list;
+
 };
 
 class App {
 public:
+    App::App()
+        : processWnd()
+        , moduleWnd()
+        , kernelWnd()
+        , regeditWnd()
+        , fileWnd()
+        , netWnd()
+    {}
+
     void Render();
     void SetDockingWnd(bool* p_open);
 
@@ -30,12 +42,18 @@ public:
     void RenderRegeditWnd();
     void RenderFileWnd();
     void RenderNetWnd();
-    void RefreshProcessList();
+    void test();
     void RenderMenuBar();
 
-    ArkR3* arkR3;
+    ArkR3 arkR3;
     Context Ctx;
 
+    ProcessWnd processWnd;
+    ModuleWnd moduleWnd;
+    KernelWnd kernelWnd;
+    RegeditWnd regeditWnd;
+    FileWnd fileWnd;
+    NetWnd netWnd;
 };
 
 
