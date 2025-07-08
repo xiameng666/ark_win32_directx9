@@ -14,8 +14,8 @@
     <Filter Include="Ark">
       <UniqueIdentifier>{4a01de34-2696-463a-a5cf-a6140f94b32d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Ark\Wnd">
-      <UniqueIdentifier>{0602617f-6e11-4031-98cd-3dbfbda77617}</UniqueIdentifier>
+    <Filter Include="Ark\窗口">
+      <UniqueIdentifier>{5345eb00-7ef4-42ae-96e7-6b2b7314dc05}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -49,26 +49,32 @@
     <ClCompile Include="ArkR3.cpp">
       <Filter>Ark</Filter>
     </ClCompile>
-    <ClCompile Include="driverloader.cpp">
-      <Filter>DriverLoad</Filter>
-    </ClCompile>
-    <ClCompile Include="ProcessWnd.cpp">
-      <Filter>Ark\Wnd</Filter>
+    <ClCompile Include="FileWnd.cpp">
+      <Filter>Ark\窗口</Filter>
     </ClCompile>
     <ClCompile Include="KernelWnd.cpp">
-      <Filter>Ark\Wnd</Filter>
+      <Filter>Ark\窗口</Filter>
+    </ClCompile>
+    <ClCompile Include="MenuBar.cpp">
+      <Filter>Ark\窗口</Filter>
     </ClCompile>
     <ClCompile Include="ModuleWnd.cpp">
-      <Filter>Ark\Wnd</Filter>
+      <Filter>Ark\窗口</Filter>
     </ClCompile>
     <ClCompile Include="NetWnd.cpp">
-      <Filter>Ark\Wnd</Filter>
+      <Filter>Ark\窗口</Filter>
+    </ClCompile>
+    <ClCompile Include="ProcessWnd.cpp">
+      <Filter>Ark\窗口</Filter>
     </ClCompile>
     <ClCompile Include="RegeditWnd.cpp">
-      <Filter>Ark\Wnd</Filter>
+      <Filter>Ark\窗口</Filter>
     </ClCompile>
-    <ClCompile Include="FileWnd.cpp">
-      <Filter>Ark\Wnd</Filter>
+    <ClCompile Include="LogWnd.cpp">
+      <Filter>Ark\窗口</Filter>
+    </ClCompile>
+    <ClCompile Include="driverloader.cpp">
+      <Filter>DriverLoad</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -99,26 +105,32 @@
     <ClInclude Include="Interface.h">
       <Filter>Ark</Filter>
     </ClInclude>
-    <ClInclude Include="driverloader.h">
-      <Filter>DriverLoad</Filter>
-    </ClInclude>
-    <ClInclude Include="ProcessWnd.h">
-      <Filter>Ark\Wnd</Filter>
+    <ClInclude Include="FileWnd.h">
+      <Filter>Ark\窗口</Filter>
     </ClInclude>
     <ClInclude Include="KernelWnd.h">
-      <Filter>Ark\Wnd</Filter>
+      <Filter>Ark\窗口</Filter>
+    </ClInclude>
+    <ClInclude Include="MenuBar.h">
+      <Filter>Ark\窗口</Filter>
     </ClInclude>
     <ClInclude Include="ModuleWnd.h">
-      <Filter>Ark\Wnd</Filter>
+      <Filter>Ark\窗口</Filter>
     </ClInclude>
     <ClInclude Include="NetWnd.h">
-      <Filter>Ark\Wnd</Filter>
+      <Filter>Ark\窗口</Filter>
+    </ClInclude>
+    <ClInclude Include="ProcessWnd.h">
+      <Filter>Ark\窗口</Filter>
     </ClInclude>
     <ClInclude Include="RegeditWnd.h">
-      <Filter>Ark\Wnd</Filter>
+      <Filter>Ark\窗口</Filter>
     </ClInclude>
-    <ClInclude Include="FileWnd.h">
-      <Filter>Ark\Wnd</Filter>
+    <ClInclude Include="LogWnd.h">
+      <Filter>Ark\窗口</Filter>
+    </ClInclude>
+    <ClInclude Include="driverloader.h">
+      <Filter>DriverLoad</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -2,7 +2,7 @@
 
 void KernelWnd::Render(bool* p_open)
 {
-    ImGui::Begin("å†…æ ¸", p_open);
-    ImGui::Text("è¿™é‡Œæ˜¾ç¤ºå†…æ ¸ç›¸å…³ä¿¡æ¯ã€‚");
+    ImGui::Begin(u8"ÄÚºË", p_open);
+    ImGui::Text(u8"ÕâÀïÏÔÊ¾ÄÚºËÏà¹ØĞÅÏ¢¡£");
     ImGui::End();
 } 

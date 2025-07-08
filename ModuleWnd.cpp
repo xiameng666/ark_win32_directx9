@@ -2,7 +2,7 @@
 
 void ModuleWnd::Render(bool* p_open)
 {
-    ImGui::Begin("æ¨¡å—", p_open);
-    ImGui::Text("è¿™é‡Œæ˜¾ç¤ºæ¨¡å—ç›¸å…³ä¿¡æ¯ã€‚");
+    ImGui::Begin(u8"Ä£¿é", p_open);
+    ImGui::Text(u8"ÕâÀïÏÔÊ¾Ä£¿éÏà¹ØĞÅÏ¢¡£");
     ImGui::End();
 } 

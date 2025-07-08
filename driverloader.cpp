@@ -1,33 +1,38 @@
 #include "driverloader.h"
 #include <stdio.h>
-#include <tchar.h>
 
 
-void DriverLoader::SetPath(PCTSTR drivername, PCTSTR svcname)
+void DriverLoader::SetPath()
 {
-	Log(_T("SetPath: drivername=%s, svcname=%s\n"), drivername ? drivername : _T("(null)"), svcname ? svcname : _T("(null)"));
-	m_driverName = drivername;
-	m_serviceName = svcname;
-	return;
+    char path[MAX_PATH] = { 0 };
+    GetCurrentDirectoryA(MAX_PATH, path);
+    strcat(path, SYS_REL_NAME_);
+    strcpy(m_driverFullPath, path);
+    Log("SetPath: m_driverFullPath=%s\n", m_driverFullPath);
 }
 
-bool DriverLoader::Load(PCTSTR drivername, PCTSTR svcname)
+bool DriverLoader::Load(const char* drivername, const char* svcname)
 {
-	Log(_T("Load: drivername=%s, svcname=%s\n"), drivername ? drivername : _T("(null)"), svcname ? svcname : _T("(null)"));
-	if (drivername == nullptr) drivername = m_driverName;
+	if (drivername == nullptr) drivername = m_driverFullPath;
 	if (svcname == nullptr) svcname = m_serviceName;
+	Log("Load: drivername=%s, svcname=%s, \n",
+		drivername, svcname);
 
 	SC_HANDLE schSCManager;
 	SC_HANDLE schService;
+	//char szPath[MAX_PATH];
+	//GetCurrentDirectory(sizeof(szPath), szPath);
+	//lstrcat(szPath, "\\");
+	//lstrcat(szPath, drivername);
 
 	schSCManager = OpenSCManager(
-		NULL,                   // 目标计算机的名称,NULL：连接本地计算机上的服务控制管理器
-		NULL,                   // 服务控制管理器数据库的名称，NULL：打开 SERVICES_ACTIVE_DATABASE 数据库
-		SC_MANAGER_ALL_ACCESS   // 所有权限
+		NULL,                   
+		NULL,                   
+		SC_MANAGER_ALL_ACCESS   
 	);
 
 	if (NULL == schSCManager) {
-		LogErr(_T("OpenSCManager 失败"));
+		LogErr("OpenSCManager ");
 		return false;
 	}
 
@@ -51,29 +56,30 @@ bool DriverLoader::Load(PCTSTR drivername, PCTSTR svcname)
 		if (ERROR_SERVICE_EXISTS == GetLastError()) {
 			schService = OpenService(schSCManager, svcname, SERVICE_ALL_ACCESS);
 			if (schService == NULL) {
-				LogErr(_T("OpenService 失败"));
+				LogErr("OpenService ʧ��");
 				CloseServiceHandle(schSCManager);
 				return false;
 			}
 		}
 		else {
-			LogErr(_T("CreateService 失败"));
+			LogErr("CreateService ʧ��");
 			CloseServiceHandle(schSCManager);
 			return false;
 		}
 	}
 	
-	Log(_T("Service 安装成功\n"));
+	Log("Service created successfully.\n");
 
 	CloseServiceHandle(schService);
 	CloseServiceHandle(schSCManager);
 	return true;
 }
 
-bool DriverLoader::Start(PCTSTR svcname)
+bool DriverLoader::Start(const char* svcname)
 {
-	Log(_T("Start: svcname=%s\n"), svcname ? svcname : _T("(null)"));
 	if (svcname == nullptr) svcname = m_serviceName;
+
+	Log("Start  svcname=%s, \n", svcname);
 
 	SC_HANDLE schSCManager = NULL;
 	SC_HANDLE hs = NULL;
@@ -82,28 +88,28 @@ bool DriverLoader::Start(PCTSTR svcname)
 	do {
 		schSCManager = OpenSCManager
 		(
-			NULL,                   // 目标计算机的名称,NULL：连接本地计算机上的服务控制管理器
-			NULL,                   // 服务控制管理器数据库的名称，NULL：打开 SERVICES_ACTIVE_DATABASE 数据库
-			SC_MANAGER_ALL_ACCESS   // 所有权限
+			NULL,                   
+			NULL,                   
+			SC_MANAGER_ALL_ACCESS   
 		);
 
 		if (schSCManager == NULL) {
-			LogErr(_T("OpenSCManager 失败"));
+			LogErr("OpenSCManager failed");
 			break;
 		}
 
 		hs = OpenService(schSCManager, svcname, SERVICE_ALL_ACCESS);
 		if (hs == NULL) {
-			LogErr(_T("OpenService 失败"));
+			LogErr("OpenService failed");
 			break;
 		}
 
 		if (!StartService(hs, 0, 0)) {
-			LogErr(_T("StartService 失败"));
+			LogErr("StartService failed");
 			break;
 		}
 
-		Log(_T("Service start successful."));
+		Log("Service start successful.");
 		bRet = true;
 
 	} while (false);
@@ -113,9 +119,8 @@ bool DriverLoader::Start(PCTSTR svcname)
 	return bRet;
 }
 
-bool DriverLoader::Stop(PCTSTR svcname)
+bool DriverLoader::Stop(const char* svcname)
 {
-	Log(_T("Stop: svcname=%s\n"), svcname ? svcname : _T("(null)"));
 	if (svcname == nullptr) svcname = m_serviceName;
 	SC_HANDLE schSCManager = NULL;
 	SC_HANDLE hs = NULL;
@@ -124,23 +129,23 @@ bool DriverLoader::Stop(PCTSTR svcname)
 	do {
 		schSCManager = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
 		if (!schSCManager) {
-			LogErr(_T("OpenSCManager 失败"));
+			LogErr("OpenSCManager failed");
 			break;
 		}
 
 		hs = OpenService(schSCManager, svcname, SERVICE_ALL_ACCESS);
 		if (!hs) {
-			LogErr(_T("OpenService 失败"));
+			LogErr("OpenService failed");
 			break;
 		}
 
 		SERVICE_STATUS status = {};
 		if (!ControlService(hs, SERVICE_CONTROL_STOP, &status)) {
-			LogErr(_T("ControlService stop 失败"));
+			LogErr("ControlService stop failed");
 			break;
 		}
 
-		Log(_T("Service 停止成功."));
+		Log("Service stopped successfully.\n");
 		bRet = true;
 	} while (false);
 
@@ -149,46 +154,51 @@ bool DriverLoader::Stop(PCTSTR svcname)
 	return bRet;
 }
 
-bool DriverLoader::Unload(PCTSTR svcname)
+bool DriverLoader::Unload(const char* svcname)
 {
-	Log(_T("Unload: svcname=%s\n"), svcname ? svcname : _T("(null)"));
 	if (svcname == nullptr) svcname = m_serviceName;
 	SC_HANDLE schSCManager = NULL;
 	SC_HANDLE hs = NULL;
 	bool bRet = false;
 
+    if (m_hDriver != INVALID_HANDLE_VALUE) {
+        CloseHandle(m_hDriver);
+        m_hDriver = INVALID_HANDLE_VALUE;
+    }
+
 	do {
 		schSCManager = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
 		if (!schSCManager) {
-			LogErr(_T("OpenSCManager 失败"));
+			LogErr("OpenSCManager failed");
 			break;
 		}
 
 		hs = OpenService(schSCManager, svcname, SERVICE_ALL_ACCESS);
 		if (!hs) {
-			LogErr(_T("OpenService 失败"));
+			LogErr("OpenService failed");
 			break;
 		}
 
 		if (!DeleteService(hs)) {
-			LogErr(_T("UnloadService failed"));
+			LogErr("UnloadService failed");
 			break;
 		}
 
-		Log(_T("Service 卸载成功."));
+		Log("Service unloaded successfully.\n");
 		bRet = true;
 	} while (false);
 
 	if (hs) CloseServiceHandle(hs);
 	if (schSCManager) CloseServiceHandle(schSCManager);
+
 	return bRet;
 }
 
-bool DriverLoader::Open(PCTSTR linkname)
+bool DriverLoader::Open()
 {
-	Log(_T("Open: linkname=%s\n"), linkname ? linkname : _T("(null)"));
+	Log("Open: linkname=%s\n",m_openName);
 	m_hDriver = CreateFile(
-		linkname,
+        m_openName,
 		GENERIC_ALL,
 		0,
 		NULL,
@@ -200,36 +210,35 @@ bool DriverLoader::Open(PCTSTR linkname)
 	if (m_hDriver != INVALID_HANDLE_VALUE)
 		return TRUE;
 	else
-		LogErr(_T("打开驱动失败"));
-		return FALSE;
+		LogErr("Failed to open driver");
+	return FALSE;
 }
 
-void DriverLoader::Log(PCTSTR fmt, ...)
+void DriverLoader::Log(const char* fmt, ...)
 {
-	TCHAR buf[512] = { 0 };
+	char buf[512] = { 0 };
 	va_list args;
 	va_start(args, fmt);
-	_vsntprintf(buf, sizeof(buf) / sizeof(TCHAR), fmt, args);
+    vsnprintf(buf, sizeof(buf), fmt, args);
 	va_end(args);
 
 	OutputDebugString(buf);
 	if (m_pObs) m_pObs->OnLog(buf);
-
 }
 
-void DriverLoader::LogErr(PCTSTR prefix)
+void DriverLoader::LogErr(const char* prefix)
 {
 	DWORD err = GetLastError();
-	TCHAR msgBuf[512] = { 0 };
+	char msgBuf[512] = { 0 };
 	FormatMessage(
 		FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 		NULL,
 		err,
 		0,
 		msgBuf,
-		sizeof(msgBuf) / sizeof(TCHAR),
+		sizeof(msgBuf),
 		NULL
 	);
 
-	Log(_T("%s (%lu): %s"), prefix, err, msgBuf);
+	Log("%s (%lu): %s", prefix, err, msgBuf);
 }

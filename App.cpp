@@ -2,22 +2,25 @@
 
 void App::Render()
 {
+
     SetDockingWnd(0);
 
-    RenderMenuBar();
-
-    if (Ctx.show_process_wnd)
-        processWnd.Render(&Ctx.show_process_wnd);
-    if (Ctx.show_module_wnd)
-        moduleWnd.Render(&Ctx.show_module_wnd);
-    if (Ctx.show_kernel_wnd)
-        kernelWnd.Render(&Ctx.show_kernel_wnd);
-    if (Ctx.show_regedit_wnd)
-        regeditWnd.Render(&Ctx.show_regedit_wnd);
-    if (Ctx.show_net_wnd)
-        netWnd.Render(&Ctx.show_net_wnd);
-    if (Ctx.show_file_wnd)
-        fileWnd.Render(&Ctx.show_file_wnd);
+    if (ctx.show_menu_bar)
+        menuBar.Render(&ctx.show_menu_bar);
+    if (ctx.show_process_wnd)
+        processWnd.Render(&ctx.show_process_wnd);
+    if (ctx.show_module_wnd)
+        moduleWnd.Render(&ctx.show_module_wnd);
+    if (ctx.show_kernel_wnd)
+        kernelWnd.Render(&ctx.show_kernel_wnd);
+    if (ctx.show_regedit_wnd)
+        regeditWnd.Render(&ctx.show_regedit_wnd);
+    if (ctx.show_net_wnd)
+        netWnd.Render(&ctx.show_net_wnd);
+    if (ctx.show_file_wnd)
+        fileWnd.Render(&ctx.show_file_wnd);
+    if (ctx.show_log_wnd)
+        logWnd.Render(&ctx.show_log_wnd);
 
     ImGui::ShowStyleEditor();
 
@@ -52,7 +55,7 @@ void App::SetDockingWnd(bool* p_open)
 
     if (!opt_padding)
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-    ImGui::Begin("驱动级任务管理器", p_open, window_flags);
+    ImGui::Begin(u8"驱动级任务管理器", p_open, window_flags);
     if (!opt_padding)
         ImGui::PopStyleVar();
 
@@ -70,51 +73,12 @@ void App::SetDockingWnd(bool* p_open)
 
 }
 
-void App::RenderMenuBar()
-{
-    if (ImGui::BeginMenuBar())
-    {
-        if (ImGui::BeginMenu("视图"))
-        {
-            ImGui::MenuItem("进程面板", nullptr, &Ctx.show_process_wnd);
-            ImGui::MenuItem("模块面板", nullptr, &Ctx.show_module_wnd);
-            ImGui::MenuItem("内核面板", nullptr, &Ctx.show_kernel_wnd);
-            ImGui::MenuItem("注册表面板", nullptr, &Ctx.show_regedit_wnd);
-            ImGui::EndMenu();
-        }
-
-        if (ImGui::BeginMenu("驱动"))
-        {
-            if (ImGui::MenuItem("SetPath")) {
-                // 调用 SetPath
-            }
-            if (ImGui::MenuItem("Load")) {
-                // 调用 Load
-            }
-            if (ImGui::MenuItem("Start")) {
-                // 调用 Start
-            }
-            if (ImGui::MenuItem("Open")) {
-                // 调用 Open
-            }
-            if (ImGui::MenuItem("Stop/Unload")) {
-                // 调用 Stop/Unload
-            }
-            ImGui::EndMenu();
-        }
-
-        ImGui::EndMenuBar();
-    }
-
-
-}
-
 void App::test() {
 
     int count =60; 
-    auto* pInfo = Ctx.arkR3.GetProcessInfo(count);
+    auto* pInfo = ctx.arkR3.GetProcessInfo(count);
 
-    Ctx.list.clear();
+    ctx.list.clear();
     for (int i = 0; i < count; ++i) {
         PROCESS_INFO info;
         strcpy_s(info.Name, pInfo[i].Name);
@@ -122,7 +86,7 @@ void App::test() {
         info.ParentId = pInfo[i].ParentId;
         info.Cpu = pInfo[i].Cpu;
         strcpy_s(info.Path, pInfo[i].Path);
-        Ctx.list.push_back(info);
+        ctx.list.push_back(info);
     }
     free(pInfo); 
 }

@@ -2,7 +2,7 @@
 
 void FileWnd::Render(bool* p_open)
 {
-    ImGui::Begin("æ–‡ä»¶", p_open);
-    ImGui::Text("è¿™é‡Œæ˜¾ç¤ºæ–‡ä»¶è¡¨ç›¸å…³ä¿¡æ¯ã€‚");
+    ImGui::Begin(u8"ÎÄ¼ş", p_open);
+    ImGui::Text(u8"ÕâÀïÏÔÊ¾ÎÄ¼ş±íÏà¹ØĞÅÏ¢¡£");
     ImGui::End();
 } 

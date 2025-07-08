@@ -2,7 +2,7 @@
 
 void NetWnd::Render(bool* p_open)
 {
-    ImGui::Begin("ç½‘ç»œ", p_open);
-    ImGui::Text("è¿™é‡Œæ˜¾ç¤ºNetç›¸å…³ä¿¡æ¯ã€‚");
+    ImGui::Begin(u8"ÍøÂç", p_open);
+    ImGui::Text(u8"ÕâÀïÏÔÊ¾NetÏà¹ØĞÅÏ¢¡£");
     ImGui::End();
 } 

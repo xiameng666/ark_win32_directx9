@@ -11,8 +11,8 @@
 
 #include <vector>
 #include "../include/proto.h"
+#include <string>
 #include "ArkR3.h"
-
 struct Context {
     bool show_process_wnd = true;
     bool show_module_wnd = true;
@@ -21,12 +21,15 @@ struct Context {
     bool show_menu_bar = true;
     bool show_file_wnd = true;
     bool show_net_wnd = true;
+    bool show_log_wnd = true;
 
-    std::vector<PROCESS_INFO> list;
     ArkR3 arkR3;
+    std::vector<PROCESS_INFO> list;
+
 };
 
 class ImguiWnd {
 public:
     virtual void Render(bool* p_open = nullptr) = 0;
 };
+

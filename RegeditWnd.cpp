@@ -2,7 +2,7 @@
 
 void RegeditWnd::Render(bool* p_open)
 {
-    ImGui::Begin("æ³¨å†Œè¡¨", p_open);
-    ImGui::Text("è¿™é‡Œæ˜¾ç¤ºæ³¨å†Œè¡¨ç›¸å…³ä¿¡æ¯ã€‚");
+    ImGui::Begin(u8"×¢²á±í", p_open);
+    ImGui::Text(u8"ÕâÀïÏÔÊ¾×¢²á±íÏà¹ØĞÅÏ¢¡£");
     ImGui::End();
 } 

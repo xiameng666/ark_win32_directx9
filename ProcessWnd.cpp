@@ -2,13 +2,13 @@
 
 void ProcessWnd::Render(bool* p_open)
 {
-    ImGui::Begin("è¿›ç¨‹", p_open);
+    ImGui::Begin(u8"½ø³Ì", p_open);
     if (ImGui::BeginTable("proc_table", 5, ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_SizingStretchProp)) {
-        ImGui::TableSetupColumn("è¿›ç¨‹å");
-        ImGui::TableSetupColumn("PID");
-        ImGui::TableSetupColumn("çˆ¶PID");
-        ImGui::TableSetupColumn("CPU");
-        ImGui::TableSetupColumn("è·¯å¾„");
+        ImGui::TableSetupColumn(u8"½ø³ÌÃû");
+        ImGui::TableSetupColumn(u8"PID");
+        ImGui::TableSetupColumn(u8"¸¸PID");
+        ImGui::TableSetupColumn(u8"CPU");
+        ImGui::TableSetupColumn(u8"Â·¾¶");
         ImGui::TableHeadersRow();
 
         static int selected_index = -1;
@@ -16,7 +16,7 @@ void ProcessWnd::Render(bool* p_open)
         for (const auto& proc : ctx_->list) {
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
-            // æ•´è¡Œé€‰ä¸­
+            // ÕûÐÐÑ¡ÖÐ
             if (ImGui::Selectable(proc.Name, selected_index == row, ImGuiSelectableFlags_SpanAllColumns)) {
                 selected_index = row;
             }
@@ -29,8 +29,13 @@ void ProcessWnd::Render(bool* p_open)
         ImGui::EndTable();
     }
 
-    if (ImGui::Button("åˆ·æ–°")) {
-        // ctx_->arkR3->GetProcessInfo() ...
+    if (ImGui::Button(u8"Ë¢ÐÂ")) {
+        ctx_->arkR3.GetProcessInfo(60);
     }
     ImGui::End();
+
+
+
+
+
 }

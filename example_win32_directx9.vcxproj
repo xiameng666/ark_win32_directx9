@@ -28,7 +28,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
     <PlatformToolset>v141_xp</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -89,7 +89,6 @@
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..;..\..\backends;%(AdditionalIncludeDirectories);$(DXSDK_DIR)Include;</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -159,9 +158,11 @@
     <ClCompile Include="App.cpp" />
     <ClCompile Include="ArkR3.cpp" />
     <ClCompile Include="driverloader.cpp" />
+    <ClCompile Include="LogWnd.cpp" />
     <ClCompile Include="FileWnd.cpp" />
     <ClCompile Include="KernelWnd.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MenuBar.cpp" />
     <ClCompile Include="ModuleWnd.cpp" />
     <ClCompile Include="NetWnd.cpp" />
     <ClCompile Include="ProcessWnd.cpp" />
@@ -175,11 +176,13 @@
     <ClInclude Include="..\..\backends\imgui_impl_win32.h" />
     <ClInclude Include="App.h" />
     <ClInclude Include="ArkR3.h" />
+    <ClInclude Include="driverloader.h" />
+    <ClInclude Include="LogWnd.h" />
     <ClInclude Include="FileWnd.h" />
     <ClInclude Include="imgui_freetype.h" />
     <ClInclude Include="Interface.h" />
-    <ClInclude Include="driverloader.h" />
     <ClInclude Include="KernelWnd.h" />
+    <ClInclude Include="MenuBar.h" />
     <ClInclude Include="ModuleWnd.h" />
     <ClInclude Include="NetWnd.h" />
     <ClInclude Include="ProcessWnd.h" />
