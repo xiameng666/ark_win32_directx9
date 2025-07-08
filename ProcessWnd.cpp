@@ -13,7 +13,7 @@ void ProcessWnd::Render(bool* p_open)
 
         static int selected_index = -1;
         int row = 0;
-        for (const auto& proc : ctx_.list) {
+        for (const auto& proc : ctx_->list) {
             ImGui::TableNextRow();
             ImGui::TableSetColumnIndex(0);
             // 整行选中
@@ -30,7 +30,7 @@ void ProcessWnd::Render(bool* p_open)
     }
 
     if (ImGui::Button("刷新")) {
-      
+        // ctx_->arkR3->GetProcessInfo() ...
     }
     ImGui::End();
 }

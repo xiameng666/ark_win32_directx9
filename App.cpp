@@ -112,7 +112,7 @@ void App::RenderMenuBar()
 void App::test() {
 
     int count =60; 
-    auto* pInfo = arkR3.GetProcessInfo(count); 
+    auto* pInfo = Ctx.arkR3.GetProcessInfo(count);
 
     Ctx.list.clear();
     for (int i = 0; i < count; ++i) {
@@ -127,35 +127,5 @@ void App::test() {
     free(pInfo); 
 }
 
-void App::RenderProcessWnd()
-{
-  
-}
-
-void App::RenderModuleWnd()
-{
-
-    
-}
-
-void App::RenderKernelWnd()
-{
-   
-}
-
-void App::RenderRegeditWnd()
-{
-
-}
-
-void App::RenderFileWnd()
-{
-
-}
-
-void App::RenderNetWnd()
-{
-
-}
 
 
