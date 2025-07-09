@@ -2,7 +2,6 @@
 #include<Windows.h>
 #include <winsvc.h>
 
-
 #define DEVICE_NAME_   "\\Device\\NTDriver"
 #define SYMBOL_NAME_  "\\DosDevices\\NTDriver"
 #define DOS_NAME_     "\\\\.\\NTDriver"

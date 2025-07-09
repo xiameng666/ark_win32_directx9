@@ -13,14 +13,14 @@
 
 class App {
 public:
-    App() : processWnd(&ctx)
-        , moduleWnd(&ctx)
-        , kernelWnd(&ctx)
-        , regeditWnd(&ctx)
-        , fileWnd(&ctx)
-        , netWnd(&ctx)
-        ,menuBar { &ctx }
-        ,logWnd{ &ctx }
+    App() : processWnd_(&ctx_)
+        , moduleWnd_(&ctx_)
+        , kernelWnd_(&ctx_)
+        , regeditWnd_(&ctx_)
+        , fileWnd_(&ctx_)
+        , netWnd_(&ctx_)
+        , menuBar_ { &ctx_ }
+        , logWnd_{ &ctx_ }
     { }
 
     void Render();
@@ -29,15 +29,15 @@ public:
     void test();
 
 
-    Context ctx;
-    LogWnd logWnd;
-    MenuBar menuBar;
-    ProcessWnd processWnd;
-    ModuleWnd moduleWnd;
-    KernelWnd kernelWnd;
-    RegeditWnd regeditWnd;
-    FileWnd fileWnd;
-    NetWnd netWnd;
+    Context ctx_;
+    LogWnd logWnd_;
+    MenuBar menuBar_;
+    ProcessWnd processWnd_;
+    ModuleWnd moduleWnd_;
+    KernelWnd kernelWnd_;
+    RegeditWnd regeditWnd_;
+    FileWnd fileWnd_;
+    NetWnd netWnd_;
 };
 
 

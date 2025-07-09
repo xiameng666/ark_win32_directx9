@@ -6,8 +6,8 @@ void DriverLoader::SetPath()
 {
     char path[MAX_PATH] = { 0 };
     GetCurrentDirectoryA(MAX_PATH, path);
-    strcat(path, SYS_REL_NAME_);
-    strcpy(m_driverFullPath, path);
+    strcat_s(path, SYS_REL_NAME_);
+    strcpy_s(m_driverFullPath, path);
     Log("SetPath: m_driverFullPath=%s\n", m_driverFullPath);
 }
 
@@ -179,6 +179,50 @@ bool DriverLoader::Unload(const char* svcname)
 			break;
 		}
 
+        SERVICE_STATUS status = {};
+        if (!QueryServiceStatus(hs, &status)) {
+            LogErr("QueryServiceStatus failed");
+            break;
+        }
+
+        Log("Service current state: %d\n", status.dwCurrentState);
+
+        // 如果服务正在运行，先停止它
+        if (status.dwCurrentState != SERVICE_STOPPED) {
+            Log("Stopping service...\n");
+
+            if (!ControlService(hs, SERVICE_CONTROL_STOP, &status)) {
+                DWORD error = GetLastError();
+                if (error != ERROR_SERVICE_NOT_ACTIVE) {
+                    LogErr("ControlService stop failed");
+                  
+                }
+            }
+
+            // 等待服务完全停止（最多等待10秒）
+            for (int i = 0; i < 50; i++) {
+                if (!QueryServiceStatus(hs, &status)) {
+                    LogErr("QueryServiceStatus failed during wait");
+                    break;
+                }
+
+                if (status.dwCurrentState == SERVICE_STOPPED) {
+                    Log("Service stopped successfully.\n");
+                    break;
+                }
+
+                if (status.dwCurrentState == SERVICE_STOP_PENDING) {
+                    Log("Service stopping... (attempt %d/50)\n", i + 1);
+                    Sleep(200); // 等待200ms
+                    continue;
+                }
+
+                // 其他状态
+                Log("Service state: %d, waiting...\n", status.dwCurrentState);
+                Sleep(200);
+            }
+
+        }
 		if (!DeleteService(hs)) {
 			LogErr("UnloadService failed");
 			break;

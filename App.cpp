@@ -5,22 +5,22 @@ void App::Render()
 
     SetDockingWnd(0);
 
-    if (ctx.show_menu_bar)
-        menuBar.Render(&ctx.show_menu_bar);
-    if (ctx.show_process_wnd)
-        processWnd.Render(&ctx.show_process_wnd);
-    if (ctx.show_module_wnd)
-        moduleWnd.Render(&ctx.show_module_wnd);
-    if (ctx.show_kernel_wnd)
-        kernelWnd.Render(&ctx.show_kernel_wnd);
-    if (ctx.show_regedit_wnd)
-        regeditWnd.Render(&ctx.show_regedit_wnd);
-    if (ctx.show_net_wnd)
-        netWnd.Render(&ctx.show_net_wnd);
-    if (ctx.show_file_wnd)
-        fileWnd.Render(&ctx.show_file_wnd);
-    if (ctx.show_log_wnd)
-        logWnd.Render(&ctx.show_log_wnd);
+    if (ctx_.show_menu_bar)
+        menuBar_.Render(&ctx_.show_menu_bar);
+    if (ctx_.show_process_wnd)
+        processWnd_.Render(&ctx_.show_process_wnd);
+    if (ctx_.show_module_wnd)
+        moduleWnd_.Render(&ctx_.show_module_wnd);
+    if (ctx_.show_kernel_wnd)
+        kernelWnd_.Render(&ctx_.show_kernel_wnd);
+    if (ctx_.show_regedit_wnd)
+        regeditWnd_.Render(&ctx_.show_regedit_wnd);
+    if (ctx_.show_net_wnd)
+        netWnd_.Render(&ctx_.show_net_wnd);
+    if (ctx_.show_file_wnd)
+        fileWnd_.Render(&ctx_.show_file_wnd);
+    if (ctx_.show_log_wnd)
+        logWnd_.Render(&ctx_.show_log_wnd);
 
     ImGui::ShowStyleEditor();
 
@@ -76,9 +76,9 @@ void App::SetDockingWnd(bool* p_open)
 void App::test() {
 
     int count =60; 
-    auto* pInfo = ctx.arkR3.GetProcessInfo(count);
+    auto* pInfo = ctx_.arkR3.GetProcessInfo(count);
 
-    ctx.list.clear();
+    ctx_.list.clear();
     for (int i = 0; i < count; ++i) {
         PROCESS_INFO info;
         strcpy_s(info.Name, pInfo[i].Name);
@@ -86,7 +86,7 @@ void App::test() {
         info.ParentId = pInfo[i].ParentId;
         info.Cpu = pInfo[i].Cpu;
         strcpy_s(info.Path, pInfo[i].Path);
-        ctx.list.push_back(info);
+        ctx_.list.push_back(info);
     }
     free(pInfo); 
 }
