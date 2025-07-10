@@ -16,8 +16,6 @@ typedef struct _GDT_INFO {
     UCHAR   type;           // 段类型
     UCHAR   system;         // 系统段标志
     BOOL    p;              // 段存在位
-
-    char    typeName[32];   // 段类型名称
 } GDT_INFO, * PGDT_INFO;
 
 class ArkR3 :public DriverLoader

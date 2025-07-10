@@ -69,7 +69,7 @@ int main(int, char**)
     ImGui_ImplDX9_Init(g_pd3dDevice);
 
     // Load Fonts
-    io.Fonts->AddFontFromFileTTF("msyh.ttc", 18.0f, nullptr,
+    io.Fonts->AddFontFromFileTTF("msyh.ttc", 20.0f, nullptr,
         io.Fonts->GetGlyphRangesChineseFull());
 
     // Our state

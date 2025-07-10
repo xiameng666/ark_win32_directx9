@@ -1,5 +1,22 @@
 ﻿#include "App.h"
 
+App::App() : processWnd_(&ctx_)
+, moduleWnd_(&ctx_)
+, kernelWnd_(&ctx_)
+, regeditWnd_(&ctx_)
+, fileWnd_(&ctx_)
+, netWnd_(&ctx_)
+, menuBar_{ &ctx_ }
+, logWnd_{ &ctx_ }
+{
+    ctx_.arkR3.FastOpen();
+}
+
+App::~App()
+{
+    ctx_.arkR3.FastUnload();
+}
+
 void App::Render()
 {
 
@@ -55,7 +72,7 @@ void App::SetDockingWnd(bool* p_open)
 
     if (!opt_padding)
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-    ImGui::Begin(u8"驱动级任务管理器", p_open, window_flags);
+    ImGui::Begin(u8"ark", p_open, window_flags);
     if (!opt_padding)
         ImGui::PopStyleVar();
 
@@ -66,30 +83,30 @@ void App::SetDockingWnd(bool* p_open)
     ImGuiIO& io = ImGui::GetIO();
     if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
     {
-        ImGuiID dockspace_id = ImGui::GetID("TaskManagerDockSpace");
+        ImGuiID dockspace_id = ImGui::GetID("ArkDockSpace");
         ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
     }
 
 
 }
 
-void App::test() {
-
-    int count =60; 
-    auto* pInfo = ctx_.arkR3.GetProcessInfo(count);
-
-    ctx_.list.clear();
-    for (int i = 0; i < count; ++i) {
-        PROCESS_INFO info;
-        strcpy_s(info.Name, pInfo[i].Name);
-        info.Id = pInfo[i].Id;
-        info.ParentId = pInfo[i].ParentId;
-        info.Cpu = pInfo[i].Cpu;
-        strcpy_s(info.Path, pInfo[i].Path);
-        ctx_.list.push_back(info);
-    }
-    free(pInfo); 
-}
+//void App::test() {
+//
+//    int count =60; 
+//    auto* pInfo = ctx_.arkR3.GetProcessInfo(count);
+//
+//    ctx_.list.clear();
+//    for (int i = 0; i < count; ++i) {
+//        PROCESS_INFO info;
+//        strcpy_s(info.Name, pInfo[i].Name);
+//        info.Id = pInfo[i].Id;
+//        info.ParentId = pInfo[i].ParentId;
+//        info.Cpu = pInfo[i].Cpu;
+//        strcpy_s(info.Path, pInfo[i].Path);
+//        ctx_.list.push_back(info);
+//    }
+//    free(pInfo); 
+//}
 
 
 

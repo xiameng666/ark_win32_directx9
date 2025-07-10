@@ -2,11 +2,11 @@
 #include<Windows.h>
 #include <winsvc.h>
 
-#define DEVICE_NAME_   "\\Device\\NTDriver"
-#define SYMBOL_NAME_  "\\DosDevices\\NTDriver"
-#define DOS_NAME_     "\\\\.\\NTDriver"
-#define SYS_REL_NAME_  "\\NTDriver.sys"
-#define SVC_NAME_ "NTDriver"
+#define DEVICE_NAME_   "\\Device\\ADriver1"
+#define SYMBOL_NAME_  "\\DosDevices\\ADriver1"
+#define DOS_NAME_     "\\\\.\\ADriver1"
+#define SYS_REL_NAME_  "\\ADriver1.sys"
+#define SVC_NAME_ "ADriver1"
 
 class ILogObserver {
 public:
@@ -25,6 +25,8 @@ public:
 
     bool Open();
 
+    bool FastOpen();
+    bool FastUnload();
     char m_driverFullPath[MAX_PATH] = { 0 };
     const char* m_serviceName = SVC_NAME_;
     const char* m_dosName = DOS_NAME_;

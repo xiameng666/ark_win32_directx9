@@ -13,20 +13,13 @@
 
 class App {
 public:
-    App() : processWnd_(&ctx_)
-        , moduleWnd_(&ctx_)
-        , kernelWnd_(&ctx_)
-        , regeditWnd_(&ctx_)
-        , fileWnd_(&ctx_)
-        , netWnd_(&ctx_)
-        , menuBar_ { &ctx_ }
-        , logWnd_{ &ctx_ }
-    { }
+    App();
+    ~App();
 
     void Render();
     void SetDockingWnd(bool* p_open);
 
-    void test();
+
 
 
     Context ctx_;

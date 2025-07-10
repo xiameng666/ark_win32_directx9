@@ -37,7 +37,7 @@ std::vector<GDT_INFO> ArkR3::GetGDTVec()
             sgdt gdtr
         }
 
-        Log("GetGDTVec CPU %d: GDTR Base=08x%p, Limit=08x%X\n", i, (void*)gdtr.Base, gdtr.Limit);
+        Log("GetGDTVec CPU %d: GDTR Base=%p, Limit=%X\n", i, (void*)gdtr.Base, gdtr.Limit);
         PSEGDESC pGdtData = GetSingeGDT(i, &gdtr);
         if (pGdtData) {
             DWORD descCount = (gdtr.Limit + 1) / 8;  // 段描述符数量
@@ -47,7 +47,12 @@ std::vector<GDT_INFO> ArkR3::GetGDTVec()
                 //pDesc是段描述符指针 下面将原始数据转换成UI上显示的数据格式 
                 PSEGDESC pDesc = (PSEGDESC)((PUCHAR)pGdtData + index * sizeof(SegmentDescriptor));
 
-                //跳过空描述符 TODO
+                //跳过空描述符 
+  /*              if (index == 0 || !pDesc->p ||
+                    (pDesc->Base1 == 0 && pDesc->Base2 == 0 && pDesc->Base3 == 0 &&
+                        pDesc->Limit1 == 0 && pDesc->Limit2 == 0 && pDesc->type == 0)) {
+                    continue;  
+                }*/
 
                 // 解析成GDT_INFO
                 GDT_INFO gdtInfo = { 0 };
@@ -66,7 +71,6 @@ std::vector<GDT_INFO> ArkR3::GetGDTVec()
                     gdtInfo.limit = (gdtInfo.limit << 12) | 0xFFF;  // 低12bit置1 = 4K
                 }
 
-                // 其他字段直接赋值
                 gdtInfo.dpl = pDesc->dpl;           // 段特权级
                 gdtInfo.type = pDesc->type;         // 段类型
                 gdtInfo.system = pDesc->s;          // 系统段标志

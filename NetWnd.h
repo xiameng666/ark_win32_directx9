@@ -1,12 +1,10 @@
 #pragma once
 #include "interface.h"
 
-struct Context;
-
 class NetWnd : public ImguiWnd {
 public:
-    explicit NetWnd(Context* ctx) : ctx_(ctx) {}
+    explicit NetWnd(Context* ctx) : ImguiWnd(ctx) {}
     void Render(bool* p_open = nullptr) override;
 private:
-    Context* ctx_;
+
 }; 

@@ -258,6 +258,22 @@ bool DriverLoader::Open()
 	return FALSE;
 }
 
+bool DriverLoader::FastOpen()
+{
+    SetPath();
+    Load();
+    Start();
+    Open();
+	return false;
+}
+
+bool DriverLoader::FastUnload()
+{
+    Stop();
+    Unload();
+	return false;
+}
+
 void DriverLoader::Log(const char* fmt, ...)
 {
 	char buf[512] = { 0 };
