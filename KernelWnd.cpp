@@ -23,7 +23,7 @@ void KernelWnd::Render(bool* p_open)
 
         RenderLeftBar();
         ImGui::TableSetColumnIndex(1);
-        auto it = viewRenderers_.find(currentView_);
+        auto it = viewRenderers_.find(ctx_->currentView);
         if (it != viewRenderers_.end()) {
             it->second();
         }

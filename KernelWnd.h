@@ -8,7 +8,6 @@ public:
     void Render(bool* p_open = nullptr) override;
 private:
 
-
     void RenderGDTTable();
     void RenderIDTTable();
     void RenderLeftBar();

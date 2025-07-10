@@ -7,6 +7,8 @@
 #ifdef MENUTOP
 void MenuBar::Render(bool* p_open)
 {
+    (void)p_open;//用不到 报未使用很难受
+
     if (ImGui::BeginMenuBar())
     {
         if (ImGui::BeginMenu(u8"视图"))

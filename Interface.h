@@ -29,8 +29,8 @@
 
 // 单个视图
 #define VIEW_ITEM(text, view) \
-    if (ImGui::Selectable(text, currentView_ == view)) { \
-        currentView_ = view; \
+    if (ImGui::Selectable(text, ctx_->currentView == view)) { \
+        ctx_->currentView = view; \
     }
 
 // 导航栏框架
@@ -39,6 +39,12 @@
         __VA_ARGS__ \
         ImGui::TreePop(); \
     }
+
+enum SubView {
+    GDT,
+    IDT
+};
+
 
 struct Context {
     bool show_process_wnd = true;
@@ -51,20 +57,16 @@ struct Context {
     bool show_kernel_wnd = true;
 
     ArkR3 arkR3;
-
+    SubView currentView;
 };
 
-enum SubView {
-    GDT,
-    IDT
-};
 
 
 class ImguiWnd {
 protected:
     Context* ctx_;  
     std::map<SubView, std::function<void()>> viewRenderers_;
-    SubView currentView_;
+
 public:
     explicit ImguiWnd(Context* ctx) : ctx_(ctx) {}
     virtual void Render(bool* p_open = nullptr) = 0;

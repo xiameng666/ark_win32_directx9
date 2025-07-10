@@ -130,6 +130,7 @@ int main(int, char**)
         if (result == D3DERR_DEVICELOST && g_pd3dDevice->TestCooperativeLevel() == D3DERR_DEVICENOTRESET)
             ResetDevice();
     }
+    delete ark;
 
     ImGui_ImplDX9_Shutdown();
     ImGui_ImplWin32_Shutdown();

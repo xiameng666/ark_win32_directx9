@@ -47,13 +47,6 @@ std::vector<GDT_INFO> ArkR3::GetGDTVec()
                 //pDesc是段描述符指针 下面将原始数据转换成UI上显示的数据格式 
                 PSEGDESC pDesc = (PSEGDESC)((PUCHAR)pGdtData + index * sizeof(SegmentDescriptor));
 
-                //跳过空描述符 
-  /*              if (index == 0 || !pDesc->p ||
-                    (pDesc->Base1 == 0 && pDesc->Base2 == 0 && pDesc->Base3 == 0 &&
-                        pDesc->Limit1 == 0 && pDesc->Limit2 == 0 && pDesc->type == 0)) {
-                    continue;  
-                }*/
-
                 // 解析成GDT_INFO
                 GDT_INFO gdtInfo = { 0 };
                 gdtInfo.cpuIndex = i;
