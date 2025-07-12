@@ -15,7 +15,7 @@ std::string AnsiToUtf8(const char* ansi)
 
 
 void LogWnd::AddLog(const char* log) {
-    logs_.emplace_back(AnsiToUtf8(log));
+    logs_.push_back(AnsiToUtf8(log));
     scrollToBottom_ = true;
 }
 

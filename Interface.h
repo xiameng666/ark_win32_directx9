@@ -42,7 +42,9 @@
 
 enum SubView {
     GDT,
-    IDT
+    IDT,
+    PROCESS,
+    MEM
 };
 
 
