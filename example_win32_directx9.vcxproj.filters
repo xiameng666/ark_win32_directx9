@@ -132,6 +132,9 @@
     <ClInclude Include="driverloader.h">
       <Filter>DriverLoad</Filter>
     </ClInclude>
+    <ClInclude Include="imgui_momory_editor.h">
+      <Filter>sources</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\misc\debuggers\imgui.natvis">

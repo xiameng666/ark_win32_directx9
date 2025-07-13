@@ -178,6 +178,7 @@
     <ClInclude Include="App.h" />
     <ClInclude Include="ArkR3.h" />
     <ClInclude Include="driverloader.h" />
+    <ClInclude Include="imgui_momory_editor.h" />
     <ClInclude Include="LogWnd.h" />
     <ClInclude Include="FileWnd.h" />
     <ClInclude Include="imgui_freetype.h" />

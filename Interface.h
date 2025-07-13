@@ -2,6 +2,8 @@
 #include "imgui.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_win32.h"
+#include"imgui_momory_editor.h"
+
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -57,6 +59,7 @@ struct Context {
     bool show_net_wnd = true;
     bool show_log_wnd = true;
     bool show_kernel_wnd = true;
+    bool showMemoryWindow_ = false;
 
     ArkR3 arkR3;
     SubView currentView;
