@@ -5,13 +5,11 @@
 class ProcessWnd : public ImguiWnd {
 public:
     explicit ProcessWnd(Context* ctx);
-    ~ProcessWnd(); // 添加析构函数
     void Render(bool* p_open = nullptr) override;
     void RenderProcessWnd();
     void RenderMemWnd(DWORD pid);
 private:
 
-    unsigned char* memData_;
     char processIdText_[16] = "1234";   // 进程ID输入框
     char addressText_[16] = "00401000"; // 地址输入框
     char sizeText_[16] = "256";         // 大小输入框

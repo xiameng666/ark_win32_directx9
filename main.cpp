@@ -73,7 +73,7 @@ int main(int, char**)
         io.Fonts->GetGlyphRangesChineseFull());
 
     // Our state
-    App* ark =new App();
+    App  ark;
     //ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 0.00f);
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
@@ -81,8 +81,6 @@ int main(int, char**)
     bool done = false;
     while (!done)
     {
-
-
         // Poll and handle messages (inputs, window resize, etc.)
         // See the WndProc() function below for our to dispatch events to the Win32 backend.
         MSG msg;
@@ -101,7 +99,7 @@ int main(int, char**)
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
-        ark->Render();
+        ark.Render();
 
         // Rendering
         ImGui::EndFrame();
@@ -130,7 +128,6 @@ int main(int, char**)
         if (result == D3DERR_DEVICELOST && g_pd3dDevice->TestCooperativeLevel() == D3DERR_DEVICENOTRESET)
             ResetDevice();
     }
-    delete ark;
 
     ImGui_ImplDX9_Shutdown();
     ImGui_ImplWin32_Shutdown();

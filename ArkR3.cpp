@@ -1,6 +1,116 @@
 #include "ArkR3.h"
 #include <windows.h>
 
+// 构造函数
+ArkR3::ArkR3() : m_pMemBuffer(nullptr), m_dwBufferSize(0), m_dwDataSize(0)
+{
+    // 初始化时分配一个基础大小的缓冲区
+    EnsureBufferSize(4096); // 初始4KB
+}
+
+// 析构函数
+ArkR3::~ArkR3()
+{
+    if (m_pMemBuffer) {
+        free(m_pMemBuffer);
+        m_pMemBuffer = nullptr;
+    }
+    m_dwBufferSize = 0;
+    m_dwDataSize = 0;
+}
+
+// 确保缓冲区大小足够
+BOOL ArkR3::EnsureBufferSize(DWORD requiredSize)
+{
+    if (requiredSize > 0x100000) { // 限制最大1MB
+        Log("EnsureBufferSize: Size too large (%d bytes)", requiredSize);
+        return FALSE;
+    }
+
+    if (m_dwBufferSize >= requiredSize) {
+        return TRUE; // 当前缓冲区已足够
+    }
+
+    // 计算新的缓冲区大小（向上取整到4KB边界）
+    DWORD newSize = ((requiredSize + 4095) / 4096) * 4096;
+    
+    PVOID newBuffer = realloc(m_pMemBuffer, newSize);
+    if (!newBuffer) {
+        Log("EnsureBufferSize: Failed to allocate %d bytes", newSize);
+        return FALSE;
+    }
+
+    m_pMemBuffer = newBuffer;
+    m_dwBufferSize = newSize;
+    
+    Log("EnsureBufferSize: Buffer resized to %d bytes", newSize);
+    return TRUE;
+}
+
+// 清空缓冲区
+void ArkR3::ClearBuffer()
+{
+    if (m_pMemBuffer && m_dwBufferSize > 0) {
+        memset(m_pMemBuffer, 0, m_dwBufferSize);
+    }
+    m_dwDataSize = 0;
+}
+
+// 从十六进制字符串设置数据
+BOOL ArkR3::SetWriteDataFromHex(const char* hexString)
+{
+    if (!hexString || strlen(hexString) == 0) {
+        LogErr("SetWriteDataFromHex: Invalid hex string");
+        return FALSE;
+    }
+
+    size_t hexLen = strlen(hexString);
+    if (hexLen % 2 != 0) {
+        LogErr("SetWriteDataFromHex: Hex string length must be even");
+        return FALSE;
+    }
+
+    DWORD dataSize = hexLen / 2;
+    if (!EnsureBufferSize(dataSize)) {
+        return FALSE;
+    }
+
+    // 转换十六进制字符串为字节数组
+    PUCHAR pBuffer = (PUCHAR)m_pMemBuffer;
+    for (size_t i = 0; i < dataSize; i++) {
+        char hexByte[3] = {hexString[i*2], hexString[i*2+1], 0};
+        pBuffer[i] = (UCHAR)strtoul(hexByte, NULL, 16);
+    }
+
+    m_dwDataSize = dataSize;
+    Log("SetWriteDataFromHex: %d bytes converted from hex string", dataSize);
+    return TRUE;
+}
+
+// 获取格式化的十六进制字符串表示（16字节一行）
+std::string ArkR3::GetDataAsFormattedHexString() const
+{
+    if (!m_pMemBuffer || m_dwDataSize == 0) {
+        return "";
+    }
+
+    std::string hexStr;
+    hexStr.reserve(m_dwDataSize * 3 + m_dwDataSize / 16); // 预留换行符空间
+    
+    PUCHAR pData = (PUCHAR)m_pMemBuffer;
+    for (DWORD i = 0; i < m_dwDataSize; i++) {
+        char hexByte[4];
+        sprintf_s(hexByte, "%02X", pData[i]);
+        hexStr += hexByte;
+        
+        // 每16个字节换行
+        if ((i + 1) % 16 == 0 && i + 1 < m_dwDataSize) {
+            hexStr += "\n";
+        }
+    }
+
+    return hexStr;
+}
 
 
 PSEGDESC ArkR3::GetSingeGDT(UINT cpuIndex, PGDTR pGdtr)
@@ -134,37 +244,55 @@ std::vector<PROCESSENTRY32> ArkR3::EnumProcesses32() {
 //读取
 //R3 : [PROCESS_MEM_REQ] → R0 → R0 : [读取数据] → R3
 //发送12字节请求          接收Size字节
-BOOL ArkR3::AttachReadMem(DWORD ProcessId, ULONG VirtualAddress, PVOID Buffer ,DWORD Size)
+BOOL ArkR3::AttachReadMem(DWORD ProcessId, ULONG VirtualAddress, DWORD Size)
 {
-    //增加一个数据结构存储返回的数据 
-    PVOID pBuffer = malloc(Size);
-    if (!pBuffer) {
-        LogErr("AttachReadMem err ");
+    // 参数验证
+    if (ProcessId == 0 || Size == 0) {
+        LogErr("AttachReadMem: Invalid args");
         return FALSE;
     }
 
-    PPROCESS_MEM_REQ req = (PPROCESS_MEM_REQ)pBuffer;
+    // 确保内部缓冲区足够大
+    if (!EnsureBufferSize(Size)) {
+        LogErr("AttachReadMem: Failed to ensure buffer size");
+        return FALSE;
+    }
+
+    // 分配临时缓冲区
+    DWORD totalSize = sizeof(PROCESS_MEM_REQ) + Size;
+    PVOID pTempBuffer = malloc(totalSize);
+    if (!pTempBuffer) {
+        Log("AttachReadMem: Failed to allocate temp buffer, size: %d", totalSize);
+        return FALSE;
+    }
+
+    // 构造请求
+    PPROCESS_MEM_REQ req = (PPROCESS_MEM_REQ)pTempBuffer;
     req->ProcessId = (HANDLE)ProcessId;
     req->VirtualAddress = (PVOID)VirtualAddress;
     req->Size = Size;
 
     DWORD dwRetBytes = 0;
     BOOL bResult = DeviceIoControl(m_hDriver, CTL_ATTACH_MEM_READ, 
-        pBuffer, sizeof(PROCESS_MEM_REQ),//发送请求头就够了
-        pBuffer, Size,//接受的时候只接受读到的数据 也就是size大小 驱动返回的格式
+        pTempBuffer, sizeof(PROCESS_MEM_REQ),
+        pTempBuffer, Size,
         &dwRetBytes, NULL);
 
     if (bResult) {
-        // 读到的数据写回
-        memcpy(Buffer, pBuffer, Size);
-        Log("AttachReadMem: PID=%d, Addr=0x%08X, Size=%d - Success\n", 
+        // 将读到的数据复制到内部缓冲区
+        memcpy(m_pMemBuffer, pTempBuffer, Size);
+        m_dwDataSize = Size;
+        
+        Log("AttachReadMem: PID=%d, Addr=0x%08X, Size=%d - Success", 
             ProcessId, VirtualAddress, Size);
-        /*free(pBuffer);*/
+            
+        free(pTempBuffer);
         return TRUE;
     }
     else {
-        LogErr("AttachReadMem !bResult");
-        free(pBuffer);
+        Log("AttachReadMem: DeviceIoControl failed, PID=%d, Addr=0x%08X, Size=%d", 
+               ProcessId, VirtualAddress, Size);
+        free(pTempBuffer);
         return FALSE;
     }
 }
@@ -172,38 +300,52 @@ BOOL ArkR3::AttachReadMem(DWORD ProcessId, ULONG VirtualAddress, PVOID Buffer ,D
 //写入：
 //R3 : [PROCESS_MEM_REQ] [写入数据] → R0 → 处理完成
 //发送12 + Size字节              不需要返回数据
-BOOL ArkR3::AttachWriteMem(DWORD ProcessId, ULONG VirtualAddress, PVOID Buffer, DWORD Size)
+BOOL ArkR3::AttachWriteMem(DWORD ProcessId, ULONG VirtualAddress, DWORD Size)
 {
-    DWORD totalSize = sizeof(PROCESS_MEM_REQ) + Size;
-    PVOID pBuffer = malloc(totalSize);//请求头大小+写入的数据大小
-
-    if (!pBuffer) {
-        LogErr("WriteProcessMemory: err");
+    // 参数验证
+    if (ProcessId == 0 || VirtualAddress == 0 || Size == 0) {
+        Log("AttachWriteMem: Invalid parameters");
         return FALSE;
     }
 
+    // 检查内部缓冲区是否有足够的数据
+    if (m_dwDataSize < Size) {
+        Log("AttachWriteMem: Not enough data in buffer, available: %d, required: %d", 
+               m_dwDataSize, Size);
+        return FALSE;
+    }
+
+    DWORD totalSize = sizeof(PROCESS_MEM_REQ) + Size;
+    PVOID pBuffer = malloc(totalSize);
+
+    if (!pBuffer) {
+        Log("AttachWriteMem: Failed to allocate buffer, size: %d", totalSize);
+        return FALSE;
+    }
+
+    // 构造请求头
     PPROCESS_MEM_REQ req = (PPROCESS_MEM_REQ)pBuffer;
     req->ProcessId = (HANDLE)ProcessId;
     req->VirtualAddress = (PVOID)VirtualAddress;
     req->Size = Size;
-    memcpy((PUCHAR)pBuffer + sizeof(PROCESS_MEM_REQ), Buffer, Size);//把要写入的数据考到缓冲区
+    
+    // 从内部缓冲区复制数据到请求缓冲区
+    memcpy((PUCHAR)pBuffer + sizeof(PROCESS_MEM_REQ), m_pMemBuffer, Size);
 
     DWORD dwRetBytes = 0;
     BOOL bResult = DeviceIoControl(m_hDriver, CTL_ATTACH_MEM_WRITE,
         pBuffer, totalSize,           
-        NULL,0,  // 输出：不接受信息了
+        NULL, 0,
         &dwRetBytes, NULL);
 
     if (bResult) {
-        Log("AttachWriteMem成功: PID=%d, Addr=0x%08X, Size=%d\n",
+        Log("AttachWriteMem: PID=%d, Addr=0x%08X, Size=%d - Success",
             ProcessId, VirtualAddress, Size);
-        free(pBuffer);
-        return TRUE;
-    }
-    else {
-        Log("AttachWriteMem失败: PID=%d, Addr=0x%08X, Size=%d (dwRetBytes=%d)\n",
+    } else {
+        Log("AttachWriteMem: PID=%d, Addr=0x%08X, Size=%d (dwRetBytes=%d)",
             ProcessId, VirtualAddress, Size, dwRetBytes);
-        free(pBuffer);
-        return FALSE;
     }
+
+    free(pBuffer);
+    return bResult;
 }
