@@ -1,0 +1,144 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="sources">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="imgui">
+      <UniqueIdentifier>{a82cba23-9de0-45c2-b1e3-2eb1666702de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DriverLoad">
+      <UniqueIdentifier>{372be4d8-f200-4d08-9973-9c6329e5b4e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Ark">
+      <UniqueIdentifier>{4a01de34-2696-463a-a5cf-a6140f94b32d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Ark\窗口">
+      <UniqueIdentifier>{5345eb00-7ef4-42ae-96e7-6b2b7314dc05}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\imgui.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\imgui_demo.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\imgui_draw.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\backends\imgui_impl_win32.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\backends\imgui_impl_dx9.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\imgui_tables.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\imgui_widgets.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="App.cpp">
+      <Filter>Ark</Filter>
+    </ClCompile>
+    <ClCompile Include="ArkR3.cpp">
+      <Filter>Ark</Filter>
+    </ClCompile>
+    <ClCompile Include="FileWnd.cpp">
+      <Filter>Ark\窗口</Filter>
+    </ClCompile>
+    <ClCompile Include="KernelWnd.cpp">
+      <Filter>Ark\窗口</Filter>
+    </ClCompile>
+    <ClCompile Include="MenuBar.cpp">
+      <Filter>Ark\窗口</Filter>
+    </ClCompile>
+    <ClCompile Include="ModuleWnd.cpp">
+      <Filter>Ark\窗口</Filter>
+    </ClCompile>
+    <ClCompile Include="NetWnd.cpp">
+      <Filter>Ark\窗口</Filter>
+    </ClCompile>
+    <ClCompile Include="ProcessWnd.cpp">
+      <Filter>Ark\窗口</Filter>
+    </ClCompile>
+    <ClCompile Include="RegeditWnd.cpp">
+      <Filter>Ark\窗口</Filter>
+    </ClCompile>
+    <ClCompile Include="LogWnd.cpp">
+      <Filter>Ark\窗口</Filter>
+    </ClCompile>
+    <ClCompile Include="driverloader.cpp">
+      <Filter>DriverLoad</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\imconfig.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\imgui.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\imgui_internal.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\backends\imgui_impl_win32.h">
+      <Filter>sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\backends\imgui_impl_dx9.h">
+      <Filter>sources</Filter>
+    </ClInclude>
+    <ClInclude Include="App.h">
+      <Filter>Ark</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_freetype.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="ArkR3.h">
+      <Filter>Ark</Filter>
+    </ClInclude>
+    <ClInclude Include="Interface.h">
+      <Filter>Ark</Filter>
+    </ClInclude>
+    <ClInclude Include="FileWnd.h">
+      <Filter>Ark\窗口</Filter>
+    </ClInclude>
+    <ClInclude Include="KernelWnd.h">
+      <Filter>Ark\窗口</Filter>
+    </ClInclude>
+    <ClInclude Include="MenuBar.h">
+      <Filter>Ark\窗口</Filter>
+    </ClInclude>
+    <ClInclude Include="ModuleWnd.h">
+      <Filter>Ark\窗口</Filter>
+    </ClInclude>
+    <ClInclude Include="NetWnd.h">
+      <Filter>Ark\窗口</Filter>
+    </ClInclude>
+    <ClInclude Include="ProcessWnd.h">
+      <Filter>Ark\窗口</Filter>
+    </ClInclude>
+    <ClInclude Include="RegeditWnd.h">
+      <Filter>Ark\窗口</Filter>
+    </ClInclude>
+    <ClInclude Include="LogWnd.h">
+      <Filter>Ark\窗口</Filter>
+    </ClInclude>
+    <ClInclude Include="driverloader.h">
+      <Filter>DriverLoad</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_momory_editor.h">
+      <Filter>sources</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\misc\debuggers\imgui.natvis">
+      <Filter>imgui</Filter>
+    </None>
+  </ItemGroup>
+</Project>
