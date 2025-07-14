@@ -21,7 +21,7 @@ typedef struct GDT_INFO {
     UCHAR   type;           // 段类型
     UCHAR   system;         // 系统段标志
     BOOL    p;              // 段存在位
-} * PGDT_INFO;
+} *PGDT_INFO;
 
 class ArkR3 :public DriverLoader
 {
@@ -30,30 +30,30 @@ private://附加进程读写相关
     DWORD memBufferSize_;
     DWORD memDataSize_;
 
-    BOOL EnsureBufferSize(DWORD requiredSize);
+
 
 public:
     ArkR3();
     ~ArkR3();
 
-    PSEGDESC ArkR3::GetSingeGDT(UINT cpuIndex, PGDTR pGdtr);               //获得单核GDT表数据指针
-    std::vector<GDT_INFO> GetGDTVec();                                     //返回所有核心GDT数组_gdtVec
+    PSEGDESC ArkR3::GDTGetSingle(UINT cpuIndex, PGDTR pGdtr);              //获得单核GDT表数据指针
+    std::vector<GDT_INFO> GDTGetVec();                                     //返回所有核心GDT数组_gdtVec
     std::vector<GDT_INFO> GDTVec_;
 
-    std::vector<PROCESSENTRY32> EnumProcesses32();                         //R3的枚举进程
-    std::vector<PROCESSENTRY32> ProcVec_; 
-
-    BOOL AttachReadMem(DWORD ProcessId, ULONG VirtualAddress, DWORD Size); //附加读
-    BOOL AttachWriteMem(DWORD ProcessId, ULONG VirtualAddress, DWORD Size);//附加写
     
-    void ClearBuffer();                                                     //清空内存读写的缓冲区
+
+
+    BOOL MemAttachRead(DWORD ProcessId, ULONG VirtualAddress, DWORD Size); //附加读
+    BOOL MemAttachWrite(DWORD ProcessId, ULONG VirtualAddress, DWORD Size);//附加写
+    BOOL MemEnsureBufferSize(DWORD requiredSize);                          //确保缓冲区大小
+    void MemClearBuffer();                                                 //清空内存读写的缓冲区
     PVOID GetBufferData() const { return memBuffer_; }
     DWORD GetDataSize() const { return memDataSize_; }
     DWORD GetBufferSize() const { return memBufferSize_; }
 
-
-
-    //PPROCESS_INFO GetProcessInfo(DWORD dwEntryNum);
-
+    DWORD ProcessGetCount();                                                //获取进程数量
+    std::vector<PROCESS_INFO> ProcessGetVec(DWORD processCount = 0);        //返回所有进程数据的数组ProcVec_
+    std::vector<PROCESS_INFO> ProcVec_;
+    //std::vector<PROCESSENTRY32> EnumProcesses32();                         //R3的枚举进程
 };
 

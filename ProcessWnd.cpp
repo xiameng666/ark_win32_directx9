@@ -20,31 +20,37 @@ void ProcessWnd::Render(bool* p_open)
 
 void ProcessWnd::RenderProcessWnd() {
 
+    static std::vector<PROCESS_INFO> processUiVec;
+
     if (ImGui::Button(u8"刷新")) {
         // 获取进程列表
-        processList = ctx_->arkR3.EnumProcesses32();
+       /* processList = ctx_->arkR3.EnumProcesses32();*/
+        DWORD count = ctx_->arkR3.ProcessGetCount();
+        ctx_->arkR3.Log("数量%d", count);
+        processUiVec = ctx_->arkR3.ProcessGetVec(count);
     }
     ImGui::Separator();
 
-    if (ImGui::BeginTable("proc_table", 5, ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_SizingStretchProp)) {
-        ImGui::TableSetupColumn(u8"进程名");
-        ImGui::TableSetupColumn(u8"PID");
-        ImGui::TableSetupColumn(u8"父PID");
-        ImGui::TableSetupColumn(u8"线程数");
-        ImGui::TableSetupColumn(u8"操作");
+    if (ImGui::BeginTable("proc_table", 6, ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_SizingStretchProp)) {
+        ImGui::TableSetupColumn(u8"进程名");           // 第0列：显示名称+选择
+        ImGui::TableSetupColumn(u8"进程ID");           // 第1列
+        ImGui::TableSetupColumn(u8"父PID");            // 第2列
+        ImGui::TableSetupColumn(u8"页目录地址");       // 第3列
+        ImGui::TableSetupColumn(u8"EPROCESS地址");     // 第4列
+        ImGui::TableSetupColumn(u8"完整路径");         // 第5列
         ImGui::TableHeadersRow();
 
         static int selected_index = -1;
         int row = 0;
 
-        for (const auto& proc : processList) {
+        for (const auto& process : processUiVec) {  // ← 确保变量名正确
             ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
 
-            // 整行选中
+            // 第0列：进程名 + 选择
+            ImGui::TableSetColumnIndex(0);
             bool is_selected = (selected_index == row);
             char selectableId[64];
-            sprintf_s(selectableId, "%s##%d", proc.szExeFile, row);
+            sprintf_s(selectableId, "%s##%d", process.ImageFileName, row);
             if (ImGui::Selectable(selectableId, is_selected, ImGuiSelectableFlags_SpanAllColumns)) {
                 selected_index = row;
             }
@@ -54,29 +60,39 @@ void ProcessWnd::RenderProcessWnd() {
             sprintf_s(popupId, "ProcessMenu##%d", row);
             if (ImGui::BeginPopupContextItem(popupId)) {
                 if (ImGui::MenuItem(u8"读写内存")) {
-                    // 设置目标PID并显示内存窗口
-                    targetPid_ = proc.th32ProcessID;
-                    sprintf_s(processIdText_, "%u", proc.th32ProcessID);
+                    targetPid_ = process.ProcessId;
+                    sprintf_s(processIdText_, "%u", process.ProcessId);
                     ctx_->showMemoryWindow_ = true;
                 }
                 ImGui::EndPopup();
             }
 
+            // 第1列：进程ID
             ImGui::TableSetColumnIndex(1);
-            ImGui::Text("%u", proc.th32ProcessID);
+            ImGui::Text("%u", process.ProcessId);
 
+            // 第2列：父PID
             ImGui::TableSetColumnIndex(2);
-            ImGui::Text("%u", proc.th32ParentProcessID);
+            ImGui::Text("%u", process.ParentProcessId);
 
+            // 第3列：页目录地址（十六进制）
             ImGui::TableSetColumnIndex(3);
-            ImGui::Text("%u", proc.cntThreads);
+            ImGui::Text("0x%08X", process.DirectoryTableBase);
+
+            // 第4列：EPROCESS地址
+            ImGui::TableSetColumnIndex(4);
+            ImGui::Text("%p", process.EprocessAddr);
+
+            // 第5列：完整路径
+            ImGui::TableSetColumnIndex(5);
+            ImGui::Text("%ls", process.FullImagePath);
 
             row++;
         }
         ImGui::EndTable();
     }
 
-    ImGui::Text(u8"进程数量: %d", (int)processList.size());
+    ImGui::Text(u8"进程数量: %d", (int)processUiVec.size());
 
     // 显示内存操作窗口
     if (ctx_->showMemoryWindow_) {
@@ -107,7 +123,7 @@ void ProcessWnd::RenderMemWnd(DWORD pid)
         ULONG address = strtoul(addressText_, NULL, 16);
         DWORD size = strtoul(sizeText_, NULL, 10);
 
-        ctx_->arkR3.AttachReadMem(processId, address, size);
+        ctx_->arkR3.MemAttachRead(processId, address, size);
     }
 
     ImGui::SameLine();
@@ -120,7 +136,7 @@ void ProcessWnd::RenderMemWnd(DWORD pid)
         DWORD dataSize = ctx_->arkR3.GetDataSize();
         
         if (processId != 0 && address != 0 && pData && dataSize > 0) {
-            ctx_->arkR3.AttachWriteMem(processId, address, dataSize);
+            ctx_->arkR3.MemAttachWrite(processId, address, dataSize);
         } else {
             ctx_->arkR3.Log("processId != 0 && address != 0 && pData && dataSize > 0");
         }

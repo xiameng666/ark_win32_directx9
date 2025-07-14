@@ -36,11 +36,11 @@ void KernelWnd::Render(bool* p_open)
 
 void KernelWnd::RenderGDTTable()
 {
-    static std::vector<GDT_INFO> gdtData;
+    static std::vector<GDT_INFO> gdtUiVec;
     static bool filterInvalidSegments = true;  // 默认过滤无效段
     
     if (ImGui::Button(u8"刷新")) {
-        gdtData = ctx_->arkR3.GetGDTVec();
+        gdtUiVec = ctx_->arkR3.GDTGetVec();
     }
     
     ImGui::SameLine();
@@ -71,7 +71,7 @@ void KernelWnd::RenderGDTTable()
         int validCount = 0;
         int totalCount = 0;
         
-        for (const auto& gdt : gdtData) {
+        for (const auto& gdt : gdtUiVec) {
             totalCount++;
             
             if (filterInvalidSegments) {

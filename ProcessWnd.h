@@ -17,7 +17,7 @@ private:
 
     DWORD targetPid_ = 0;
 
-    std::vector<PROCESSENTRY32> processList;
+    //std::vector<PROCESSENTRY32> processList;
 
     MemoryEditor mem_edit;
 };

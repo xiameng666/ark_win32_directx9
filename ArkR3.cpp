@@ -5,7 +5,7 @@
 ArkR3::ArkR3() : memBuffer_(nullptr), memBufferSize_(0), memDataSize_(0)
 {
     // 初始化时分配一个基础大小的缓冲区
-    EnsureBufferSize(4096); // 初始4KB
+    MemEnsureBufferSize(4096); // 初始4KB
 }
 
 // 析构函数
@@ -20,7 +20,7 @@ ArkR3::~ArkR3()
 }
 
 // 确保缓冲区大小足够
-BOOL ArkR3::EnsureBufferSize(DWORD requiredSize)
+BOOL ArkR3::MemEnsureBufferSize(DWORD requiredSize)
 {
     if (requiredSize > 0x100000) { // 限制最大1MB
         Log("EnsureBufferSize: Size too large (%d bytes)", requiredSize);
@@ -47,7 +47,7 @@ BOOL ArkR3::EnsureBufferSize(DWORD requiredSize)
     return TRUE;
 }
 
-void ArkR3::ClearBuffer()
+void ArkR3::MemClearBuffer()
 {
     if (memBuffer_ && memBufferSize_ > 0) {
         memset(memBuffer_, 0, memBufferSize_);
@@ -56,7 +56,7 @@ void ArkR3::ClearBuffer()
 }
 
 
-PSEGDESC ArkR3::GetSingeGDT(UINT cpuIndex, PGDTR pGdtr)
+PSEGDESC ArkR3::GDTGetSingle(UINT cpuIndex, PGDTR pGdtr)
 {
     DWORD gdtSize = pGdtr->Limit + 1;
     PSEGDESC pBuffer = (PSEGDESC)malloc(gdtSize);
@@ -76,7 +76,7 @@ PSEGDESC ArkR3::GetSingeGDT(UINT cpuIndex, PGDTR pGdtr)
     return pBuffer;
 }
 
-std::vector<GDT_INFO> ArkR3::GetGDTVec()
+std::vector<GDT_INFO> ArkR3::GDTGetVec()
 {
     GDTVec_.clear();
 
@@ -93,7 +93,7 @@ std::vector<GDT_INFO> ArkR3::GetGDTVec()
         }
 
         Log("GetGDTVec CPU %d: GDTR Base=%p, Limit=%X\n", i, (void*)gdtr.Base, gdtr.Limit);
-        PSEGDESC pGdtData = GetSingeGDT(i, &gdtr);
+        PSEGDESC pGdtData = GDTGetSingle(i, &gdtr);
         if (pGdtData) {
             DWORD descCount = (gdtr.Limit + 1) / 8;  // 段描述符数量
             Log("GetGDTVec CPU %d: 解析 %d 个段描述符\n", i, descCount);
@@ -108,7 +108,7 @@ std::vector<GDT_INFO> ArkR3::GetGDTVec()
                 gdtInfo.selector = index * sizeof(SegmentDescriptor);
 
                 // 基址重组 32bit = Base1(16) + Base2(8) + Base3(8)
-                gdtInfo.base = pDesc->Base1 |(pDesc->Base2 << 16) |(pDesc->Base3 << 24);
+                gdtInfo.base = pDesc->Base1 | (pDesc->Base2 << 16) | (pDesc->Base3 << 24);
 
                 // 界限重组：Limit1(16) + Limit2(4)
                 gdtInfo.limit = pDesc->Limit1 | (pDesc->Limit2 << 16);
@@ -143,51 +143,80 @@ std::vector<GDT_INFO> ArkR3::GetGDTVec()
     return GDTVec_;
 }
 
-//PPROCESS_INFO ArkR3::GetProcessInfo(DWORD dwEntryNum)
-//{
-//    DWORD dwRetBytes;
-//    DWORD dwBufferSize = sizeof(PROCESS_INFO) * dwEntryNum;
-//    PPROCESS_INFO pEntryInfo = (PPROCESS_INFO)malloc(dwBufferSize);
-//    DeviceIoControl(m_hDriver, CTL_ENUM_PROCESS, NULL, NULL, pEntryInfo, dwBufferSize, &dwRetBytes, NULL);
-//    return pEntryInfo;
-//}
+
+DWORD ArkR3::ProcessGetCount()
+{
+    DWORD dwBytes;
+    DWORD dwEntryNum = NULL;
+
+    DeviceIoControl(m_hDriver, CTL_ENUM_PROCESS_COUNT, NULL, NULL, &dwEntryNum, sizeof(DWORD), &dwBytes, NULL);
+
+    return dwEntryNum;
+}
 
 
-// 获取进程信息并存储到数组中
-std::vector<PROCESSENTRY32> ArkR3::EnumProcesses32() {
-    HANDLE hSnapshot = INVALID_HANDLE_VALUE;
-    PROCESSENTRY32 pe32;
+std::vector<PROCESS_INFO> ArkR3::ProcessGetVec(DWORD processCount)
+{
+    DWORD dwRetBytes;
+    DWORD dwBufferSize = sizeof(PROCESS_INFO) * processCount;
+    PPROCESS_INFO pEntryInfo = (PPROCESS_INFO)malloc(dwBufferSize);
+    BOOL bResult = DeviceIoControl(m_hDriver, CTL_ENUM_PROCESS, NULL, NULL, pEntryInfo, dwBufferSize, &dwRetBytes, NULL);
 
-    ProcVec_.clear();
+    ProcVec_.clear(); // 清空之前的数据
+    
+    DWORD Count = 0;
+    if (bResult) {
+        Count = dwRetBytes / sizeof(PROCESS_INFO);
+        for (DWORD i = 0; i < Count; i++) {
+            PROCESS_INFO pInfo = pEntryInfo[i];        // ? 直接获取值
+            ProcVec_.emplace_back(pInfo);              // ? 类型匹配
 
-    // 创建进程快照
-    hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-    if (hSnapshot == INVALID_HANDLE_VALUE) {
-        LogErr("CreateToolhelp32Snapshot失败\n");
-        return ProcVec_;
+            Log("[ArkR3] 进程[%d]: PID=%d, 父PID=%d, 名称=%s, EPROCESS=%p\n",
+                i, pInfo.ProcessId, pInfo.ParentProcessId,
+                pInfo.ImageFileName, pInfo.EprocessAddr);
+        }
     }
+    
+    free(pEntryInfo); // 释放临时内存
 
-    pe32.dwSize = sizeof(PROCESSENTRY32);
-
-    if (!Process32First(hSnapshot, &pe32)) {
-        Log("Process32First失败\n");
-        CloseHandle(hSnapshot);
-        return ProcVec_;
-    }
-
-    do {
-        ProcVec_.push_back(pe32);
-    } while (Process32Next(hSnapshot, &pe32));
-
-    CloseHandle(hSnapshot);
-    Log("获取到 %d 个进程\n", (int)ProcVec_.size());
     return ProcVec_;
 }
+
+//// 获取进程信息并存储到数组中  
+//std::vector<PROCESSENTRY32> ArkR3::EnumProcesses32() {
+//    HANDLE hSnapshot = INVALID_HANDLE_VALUE;
+//    PROCESSENTRY32 pe32;
+//
+//    ProcVec_.clear();
+//
+//    // 创建进程快照
+//    hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+//    if (hSnapshot == INVALID_HANDLE_VALUE) {
+//        LogErr("CreateToolhelp32Snapshot失败\n");
+//        return ProcVec_;
+//    }
+//
+//    pe32.dwSize = sizeof(PROCESSENTRY32);
+//
+//    if (!Process32First(hSnapshot, &pe32)) {
+//        Log("Process32First失败\n");
+//        CloseHandle(hSnapshot);
+//        return ProcVec_;
+//    }
+//
+//    do {
+//        ProcVec_.push_back(pe32);
+//    } while (Process32Next(hSnapshot, &pe32));
+//
+//    CloseHandle(hSnapshot);
+//    Log("获取到 %d 个进程\n", (int)ProcVec_.size());
+//    return ProcVec_;
+//}
 
 //读取
 //R3 : [PROCESS_MEM_REQ] → R0 → R0 : [读取数据] → R3
 //发送12字节请求          接收Size字节
-BOOL ArkR3::AttachReadMem(DWORD ProcessId, ULONG VirtualAddress, DWORD Size)
+BOOL ArkR3::MemAttachRead(DWORD ProcessId, ULONG VirtualAddress, DWORD Size)
 {
     // 参数验证
     if (ProcessId == 0 || Size == 0) {
@@ -196,7 +225,7 @@ BOOL ArkR3::AttachReadMem(DWORD ProcessId, ULONG VirtualAddress, DWORD Size)
     }
 
     // 确保内部缓冲区足够大
-    if (!EnsureBufferSize(Size)) {
+    if (!MemEnsureBufferSize(Size)) {
         LogErr("AttachReadMem: Failed to ensure buffer size");
         return FALSE;
     }
@@ -231,7 +260,7 @@ BOOL ArkR3::AttachReadMem(DWORD ProcessId, ULONG VirtualAddress, DWORD Size)
 //写入：
 //R3 : [PROCESS_MEM_REQ] [写入数据] → R0 → 处理完成
 //发送12 + Size字节              不需要返回数据
-BOOL ArkR3::AttachWriteMem(DWORD ProcessId, ULONG VirtualAddress, DWORD Size)
+BOOL ArkR3::MemAttachWrite(DWORD ProcessId, ULONG VirtualAddress, DWORD Size)
 {
     // 参数验证
     if (ProcessId == 0 || VirtualAddress == 0 || Size == 0) {
