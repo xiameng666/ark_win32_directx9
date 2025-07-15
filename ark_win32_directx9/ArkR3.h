@@ -52,6 +52,16 @@ public:
     DWORD ProcessGetCount();                                                //获取进程数量
     std::vector<PROCESS_INFO> ProcessGetVec(DWORD processCount = 0);        //返回所有进程数据的数组ProcVec_
     std::vector<PROCESS_INFO> ProcVec_;
-    //std::vector<PROCESSENTRY32> EnumProcesses32();                         //R3的枚举进程
+    //std::vector<PROCESSENTRY32> EnumProcesses32();                        //R3的枚举进程
+
+    DWORD ModuleGetCount();
+    std::vector<MODULE_INFO> ModuleGetVec(DWORD moduleCount = 0);
+    std::vector<MODULE_INFO> MoudleVec_;
+    
+    // 进程模块枚举函数
+    DWORD ProcessModuleGetCount(DWORD processId);
+    std::vector<MODULE_INFO> ProcessModuleGetVec(DWORD processId, DWORD moduleCount = 0);
+    std::vector<MODULE_INFO> ProcessModuleVec_;
+
 };
 

@@ -1,5 +1,5 @@
 #include "ProcessWnd.h"
-
+#include  "ModuleWnd.h"
 ProcessWnd::ProcessWnd(Context* ctx) 
     :ImguiWnd(ctx)
 {
@@ -15,19 +15,20 @@ void ProcessWnd::Render(bool* p_open)
     
     ImGui::End();
     
-    
+    // 渲染进程模块窗口（如果需要显示）
+    if (ctx_->showProcessModuleWnd) {
+        RenderProcessModuleWnd();
+    }
 }
 
 void ProcessWnd::RenderProcessWnd() {
-
-    static std::vector<PROCESS_INFO> processUiVec;
 
     if (ImGui::Button(u8"刷新")) {
         // 获取进程列表
        /* processList = ctx_->arkR3.EnumProcesses32();*/
         DWORD count = ctx_->arkR3.ProcessGetCount();
         ctx_->arkR3.Log("数量%d", count);
-        processUiVec = ctx_->arkR3.ProcessGetVec(count);
+        ctx_->processUiVec = ctx_->arkR3.ProcessGetVec(count);
     }
     ImGui::Separator();
 
@@ -42,7 +43,7 @@ void ProcessWnd::RenderProcessWnd() {
         static int selected_index = -1;
         int row = 0;
 
-        for (const auto& process : processUiVec) {  // ← 确保变量名正确
+        for (const auto& process : ctx_->processUiVec) { 
             ImGui::TableNextRow();
 
             // 第0列：进程名 + 选择
@@ -59,9 +60,19 @@ void ProcessWnd::RenderProcessWnd() {
             sprintf_s(popupId, "ProcessMenu##%d", row);
             if (ImGui::BeginPopupContextItem(popupId)) {
                 if (ImGui::MenuItem(u8"读写内存")) {
-                    targetPid_ = process.ProcessId;
-                    sprintf_s(processIdText_, "%u", process.ProcessId);
+                    ctx_->targetPid_ = process.ProcessId;
+                    sprintf_s(ctx_->processIdText_, "%u", process.ProcessId);
                     ctx_->showMemoryWindow_ = true;
+                }
+                if (ImGui::MenuItem(u8"查看模块")) {
+                    ctx_->moduleTargetPid = process.ProcessId;
+                    sprintf_s(ctx_->moduleTargetProcessName, "%s", process.ImageFileName);
+                    ctx_->showProcessModuleWnd = true;
+                    
+                    // 加载进程模块
+                    DWORD moduleCount = ctx_->arkR3.ProcessModuleGetCount(ctx_->moduleTargetPid);
+                    ctx_->processModuleUiVec = ctx_->arkR3.ProcessModuleGetVec(ctx_->moduleTargetPid, moduleCount);
+
                 }
                 ImGui::EndPopup();
             }
@@ -87,11 +98,11 @@ void ProcessWnd::RenderProcessWnd() {
         ImGui::EndTable();
     }
 
-    ImGui::Text(u8"进程数量: %d", (int)processUiVec.size());
+    ImGui::Text(u8"进程数量: %d", (int)ctx_->processUiVec.size());
 
     // 显示内存操作窗口
     if (ctx_->showMemoryWindow_) {
-        RenderMemWnd(targetPid_);
+        RenderMemWnd(ctx_->targetPid_);
     }
 }
 
@@ -106,17 +117,17 @@ void ProcessWnd::RenderMemWnd(DWORD pid)
     ImGui::Text(u8"地址:");
     ImGui::SameLine();
     ImGui::SetNextItemWidth(100);
-    ImGui::InputText("##Address", addressText_, sizeof(addressText_));
+    ImGui::InputText("##Address", ctx_->addressText_, sizeof(ctx_->addressText_));
     ImGui::SameLine();
     ImGui::Text(u8"大小:");
     ImGui::SameLine();
     ImGui::SetNextItemWidth(80);
-    ImGui::InputText("##Size", sizeText_, sizeof(sizeText_));
+    ImGui::InputText("##Size", ctx_->sizeText_, sizeof(ctx_->sizeText_));
 
         if (ImGui::Button(u8"读")) {
-        ULONG processId = strtoul(processIdText_, NULL, 10);
-        ULONG address = strtoul(addressText_, NULL, 16);
-        DWORD size = strtoul(sizeText_, NULL, 10);
+        ULONG processId = strtoul(ctx_->processIdText_, NULL, 10);
+        ULONG address = strtoul(ctx_->addressText_, NULL, 16);
+        DWORD size = strtoul(ctx_->sizeText_, NULL, 10);
 
         ctx_->arkR3.MemAttachRead(processId, address, size);
     }
@@ -124,8 +135,8 @@ void ProcessWnd::RenderMemWnd(DWORD pid)
     ImGui::SameLine();
 
     if (ImGui::Button(u8"写")) {
-        DWORD processId = strtoul(processIdText_, NULL, 10);
-        ULONG address = strtoul(addressText_, NULL, 16);
+        DWORD processId = strtoul(ctx_->processIdText_, NULL, 10);
+        ULONG address = strtoul(ctx_->addressText_, NULL, 16);
         
         PVOID pData = ctx_->arkR3.GetBufferData();
         DWORD dataSize = ctx_->arkR3.GetDataSize();
@@ -145,11 +156,38 @@ void ProcessWnd::RenderMemWnd(DWORD pid)
     
     if (pData && dataSize > 0) {
         ImGui::Text(u8"内存编辑器:");
-        ULONG address = strtoul(addressText_, NULL, 16);
+        ULONG address = strtoul(ctx_->addressText_, NULL, 16);
         mem_edit.DrawContents(pData, dataSize, address);
     } else {
         ImGui::Text(u8"请先读取内存数据");
     }
 
+    ImGui::End();
+}
+
+// 渲染进程模块窗口
+void ProcessWnd::RenderProcessModuleWnd()
+{
+    char windowTitle[128];
+    sprintf_s(windowTitle, u8"进程模块 - [%d] %s###ProcessModule", ctx_->moduleTargetPid, ctx_->moduleTargetProcessName);
+    
+    if (ImGui::Begin(windowTitle, &ctx_->showProcessModuleWnd)) {
+        // 刷新按钮
+        if (ImGui::Button(u8"刷新模块")) {
+            DWORD moduleCount = ctx_->arkR3.ProcessModuleGetCount(ctx_->moduleTargetPid);
+            ctx_->processModuleUiVec = ctx_->arkR3.ProcessModuleGetVec(ctx_->moduleTargetPid, moduleCount);
+        }
+        
+        ImGui::SameLine();
+        ImGui::Text(u8"模块数量: %d", (int)ctx_->processModuleUiVec.size());
+        
+        ImGui::Separator();
+        
+        // 直接调用静态函数
+        char tableTitle[64];
+        sprintf_s(tableTitle, u8"进程%d模块列表", ctx_->moduleTargetPid);
+        ModuleWnd::RenderModuleTable(ctx_->processModuleUiVec, tableTitle);
+    }
+    
     ImGui::End();
 }

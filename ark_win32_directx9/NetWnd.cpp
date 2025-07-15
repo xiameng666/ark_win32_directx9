@@ -1,5 +1,10 @@
 #include "NetWnd.h"
 
+NetWnd::NetWnd(Context* ctx)
+    : ImguiWnd(ctx)
+{
+}
+
 void NetWnd::Render(bool* p_open)
 {
     ImGui::Begin(u8"ÍøÂç", p_open);

@@ -46,7 +46,9 @@ enum SubView {
     GDT,
     IDT,
     PROCESS,
-    MEM
+    MEM,
+    MODULE,
+    PROCESS_MODULE
 };
 
 
@@ -61,6 +63,23 @@ struct Context {
     bool show_kernel_wnd = true;
     bool showMemoryWindow_ = false;
 
+    // UI数据存储
+    std::vector<PROCESS_INFO> processUiVec;           // 进程列表数据
+    std::vector<MODULE_INFO> globalModuleUiVec;       // 全局模块数据
+    std::vector<MODULE_INFO> processModuleUiVec;      // 进程模块数据
+    
+    // 进程模块窗口状态
+    bool showProcessModuleWnd = false;
+    DWORD moduleTargetPid = 0;
+    char moduleTargetProcessName[64] = "";
+
+    //进程窗口状态
+    char processIdText_[16] = "1234";   // 进程ID输入框
+    char addressText_[16] = "00400000"; // 地址输入框
+    char sizeText_[16] = "256";         // 大小输入框
+    DWORD targetPid_ = 0;
+
+
     ArkR3 arkR3;
     SubView currentView;
 };
@@ -70,7 +89,7 @@ struct Context {
 class ImguiWnd {
 protected:
     Context* ctx_;  
-    std::map<SubView, std::function<void()>> viewRenderers_;
+    std::map<SubView, std::function<void()>> viewRenderers_;//说实话没啥用 找个时间删了
 
 public:
     explicit ImguiWnd(Context* ctx) : ctx_(ctx) {}

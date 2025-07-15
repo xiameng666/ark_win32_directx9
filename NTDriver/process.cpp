@@ -92,6 +92,4 @@ NTSTATUS EnumProcessEx(PPROCESS_INFO processBuffer, bool onlyGetCount, PULONG pr
         KdPrint(("[XM] err EnumerateProcessCount \n"));
         return STATUS_UNSUCCESSFUL;
     }
-
-
 }

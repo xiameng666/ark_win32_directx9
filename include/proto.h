@@ -27,30 +27,32 @@ enum WindowsVersion
 #define CTL_ENUM_PROCESS            MY_CTL_CODE(21)   // 返回数据
 #define CTL_KILL_PROCESS            MY_CTL_CODE(22)   // 终止进程
 
+#define CTL_ENUM_MODULE_COUNT       MY_CTL_CODE(30)   // 枚举模块 返回数量
+#define CTL_ENUM_MODULE             MY_CTL_CODE(31)   // 枚举模块 返回数据
 
-//#define CTL_ENUM_MODULE_COUNT       MY_CTL_CODE(20)
-//#define CTL_ENUM_MODULE             MY_CTL_CODE(21)   // 枚举模块
+#define CTL_ENUM_PROCESS_MODULE_COUNT MY_CTL_CODE(32)   // 枚举进程模块 返回数量
+#define CTL_ENUM_PROCESS_MODULE       MY_CTL_CODE(33)   // 枚举进程模块 返回数据
+
+//#define CTL_ENUM_DRIVER_COUNT       MY_CTL_CODE(40)
+//#define CTL_ENUM_DRIVER             MY_CTL_CODE(41)   // 枚举驱动
 //
-//#define CTL_ENUM_DRIVER_COUNT       MY_CTL_CODE(30)
-//#define CTL_ENUM_DRIVER             MY_CTL_CODE(31)   // 枚举驱动
+//#define CTL_ENUM_THREAD_COUNT       MY_CTL_CODE(50)
+//#define CTL_ENUM_THREAD             MY_CTL_CODE(51)   // 枚举线程
 //
-//#define CTL_ENUM_THREAD_COUNT       MY_CTL_CODE(40)
-//#define CTL_ENUM_THREAD             MY_CTL_CODE(41)   // 枚举线程
+//#define CTL_ENUM_HANDLE_COUNT       MY_CTL_CODE(60)
+//#define CTL_ENUM_HANDLE             MY_CTL_CODE(61)   // 枚举句柄
+//#define CTL_QUERY_SYSINFO           MY_CTL_CODE(62)   // 查询系统信息
 //
-//#define CTL_ENUM_HANDLE_COUNT       MY_CTL_CODE(50)
-//#define CTL_ENUM_HANDLE             MY_CTL_CODE(51)   // 枚举句柄
-//#define CTL_QUERY_SYSINFO           MY_CTL_CODE(52)   // 查询系统信息
+//#define CTL_ENUM_REGISTRY_COUNT     MY_CTL_CODE(70)
+//#define CTL_ENUM_REGISTRY           MY_CTL_CODE(71)   // 枚举注册表项
+//#define CTL_READ_REGISTRY           MY_CTL_CODE(72)  // 读取注册表
+//#define CTL_WRITE_REGISTRY          MY_CTL_CODE(73)  // 写注册表
 //
-//#define CTL_ENUM_REGISTRY_COUNT     MY_CTL_CODE(60)
-//#define CTL_ENUM_REGISTRY           MY_CTL_CODE(61)   // 枚举注册表项
-//#define CTL_READ_REGISTRY           MY_CTL_CODE(62)  // 读取注册表
-//#define CTL_WRITE_REGISTRY          MY_CTL_CODE(63)  // 写注册表
+//#define CTL_ENUM_CALLBACK_COUNT     MY_CTL_CODE(80)
+//#define CTL_ENUM_CALLBACK           MY_CTL_CODE(81)  // 枚举内核回调
 //
-//#define CTL_ENUM_CALLBACK_COUNT     MY_CTL_CODE(70)
-//#define CTL_ENUM_CALLBACK           MY_CTL_CODE(71)  // 枚举内核回调
-//
-//#define CTL_ENUM_HOOK_COUNT         MY_CTL_CODE(80)
-//#define CTL_ENUM_HOOK               MY_CTL_CODE(81)  // 枚举钩子
+//#define CTL_ENUM_HOOK_COUNT         MY_CTL_CODE(90)
+//#define CTL_ENUM_HOOK               MY_CTL_CODE(91)  // 
 
 
 
@@ -89,14 +91,21 @@ typedef struct PROCESS_INFO {
 
 }*PPROCESS_INFO;
 
-//typedef struct DRIVER_INFO {
-//    char Name[256];
-//    unsigned int  ImageBase;
-//    char Path[256];
-//    char Company[256];
-//    char Version[256];
-//    char describe[256];
-//}*PDRIVER_INFO;
+typedef struct MODULE_INFO {
+    CHAR Name[64];                      // 模块名称（短名）
+    CHAR FullPath[256];                 // 模块完整路径
+    PVOID ImageBase;                    // 模块基地址
+    ULONG ImageSize;                    // 模块大小
+    USHORT LoadOrderIndex;              // 加载顺序索引
+    USHORT LoadCount;                   // 加载计数
+
+    //CHAR Company[128];                // 厂商信息（暂时为空，需要解析PE）
+}*PMODULE_INFO;
+
+typedef struct PROCESS_MODULE_REQ {
+    HANDLE ProcessId;                   // 目标进程ID
+    ULONG ModuleCount;                  // 模块数量（输出参数）
+}*PPROCESS_MODULE_REQ;
 
 typedef struct SegmentDescriptor {
     // ========== 历史字段 (来自80286) ==========

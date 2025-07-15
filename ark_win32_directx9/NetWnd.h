@@ -3,7 +3,7 @@
 
 class NetWnd : public ImguiWnd {
 public:
-    explicit NetWnd(Context* ctx) : ImguiWnd(ctx) {}
+    explicit NetWnd(Context* ctx);
     void Render(bool* p_open = nullptr) override;
 private:
 

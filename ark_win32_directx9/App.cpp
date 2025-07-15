@@ -39,7 +39,6 @@ void App::Render()
     if (ctx_.show_log_wnd)
         logWnd_.Render(&ctx_.show_log_wnd);
 
-    ImGui::ShowStyleEditor();
 
     ImGui::End();
 }

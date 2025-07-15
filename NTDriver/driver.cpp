@@ -1,7 +1,103 @@
 ﻿#include "driver.h"
 
+#ifndef MEM_IMAGE
+#define MEM_IMAGE   0x1000000   // 镜像文件映射的内存类型
+#endif
+
 ULONG g_TestValue = 0x11223344;
 ULONG g_WindowsVersion = 0;
+
+extern "C"
+NTSTATUS NTAPI ZwQuerySystemInformation(
+    __in SYSTEM_INFORMATION_CLASS SystemInformationClass,
+    __out_bcount_opt(SystemInformationLength) PVOID SystemInformation,
+    __in ULONG SystemInformationLength,
+    __out_opt PULONG ReturnLength
+);
+
+NTSTATUS EnumModuleEx(PMODULE_INFO ModuleBuffer, bool CountOnly, PULONG ModuleCount)
+{
+    NTSTATUS Status;
+    PRTL_PROCESS_MODULES Modules;
+    PRTL_PROCESS_MODULE_INFORMATION ModuleInfo;
+    PVOID Buffer;
+    ULONG BufferSize = 4096;
+    ULONG ReturnLength;
+    ULONG i;
+    ULONG Count = 0;
+
+    KdPrint(("[XM] EnumModuleEx: CountOnly=%d\n", CountOnly));
+
+retry:
+    Buffer = ExAllocatePoolWithTag(NonPagedPool, BufferSize, 'MDLE');
+    if (!Buffer) {
+        return STATUS_NO_MEMORY;
+    }
+
+    Status = ZwQuerySystemInformation(SystemModuleInformation,
+        Buffer,
+        BufferSize,
+        &ReturnLength
+    );
+
+    if (Status == STATUS_INFO_LENGTH_MISMATCH) {
+        ExFreePool(Buffer);
+        BufferSize = ReturnLength;
+        goto retry;
+    }
+
+    if (!NT_SUCCESS(Status)) {
+        ExFreePool(Buffer);
+        return Status;
+    }
+
+    Modules = (PRTL_PROCESS_MODULES)Buffer;
+    Count = Modules->NumberOfModules;
+
+    if (CountOnly) {
+        *ModuleCount = Count;
+        ExFreePool(Buffer);
+        return STATUS_SUCCESS;
+    }
+
+    // 填充模块信息
+    for (i = 0, ModuleInfo = &(Modules->Modules[0]);
+        i < Modules->NumberOfModules && ModuleBuffer;
+        i++, ModuleInfo++) {
+        
+        __try {
+            // 清空结构体
+            RtlZeroMemory(&ModuleBuffer[i], sizeof(MODULE_INFO));
+            
+            // 提取模块名称（从完整路径中提取文件名）
+            CHAR* fileName = (CHAR*)ModuleInfo->FullPathName + ModuleInfo->OffsetToFileName;
+            RtlCopyMemory(ModuleBuffer[i].Name, fileName, 
+                min(strlen(fileName), sizeof(ModuleBuffer[i].Name) - 1));
+            
+            // 完整路径
+            RtlCopyMemory(ModuleBuffer[i].FullPath, ModuleInfo->FullPathName,
+                min(strlen((CHAR*)ModuleInfo->FullPathName), sizeof(ModuleBuffer[i].FullPath) - 1));
+            
+            // 基地址和大小
+            ModuleBuffer[i].ImageBase = ModuleInfo->ImageBase;
+            ModuleBuffer[i].ImageSize = ModuleInfo->ImageSize;
+            ModuleBuffer[i].LoadOrderIndex = ModuleInfo->LoadOrderIndex;
+            ModuleBuffer[i].LoadCount = ModuleInfo->LoadCount;
+            
+            
+            KdPrint(("[XM] Module[%d]: Name=%s, Base=%p, Size=0x%X\n",
+                i, ModuleBuffer[i].Name, ModuleBuffer[i].ImageBase, ModuleBuffer[i].ImageSize));
+        }
+        __except (EXCEPTION_EXECUTE_HANDLER) {
+            KdPrint(("[XM] EnumModuleEx: Exception processing module %d\n", i));
+            continue;
+        }
+    }
+
+    *ModuleCount = Count;
+    ExFreePool(Buffer);
+    return STATUS_SUCCESS;
+}
 
 NTSTATUS DetectWindowsVersion()
 {
@@ -278,6 +374,57 @@ NTSTATUS DispatchDeviceControl(
         }
     }
     break;
+    case CTL_ENUM_MODULE_COUNT:
+    {
+        ULONG moduleCount = 0;
+        status = EnumModuleEx(NULL, TRUE, &moduleCount);
+        if (NT_SUCCESS(status)) {
+            *(PULONG)Irp->AssociatedIrp.SystemBuffer = moduleCount;
+            info = sizeof(ULONG);
+            KdPrint(("[XM] CTL_ENUM_MODULE_COUNT: %d 个模块\n", moduleCount));
+        }
+    }
+    break;
+    case CTL_ENUM_MODULE:
+    {
+        ULONG moduleCount = 0;
+        status = EnumModuleEx((PMODULE_INFO)Irp->AssociatedIrp.SystemBuffer,
+            FALSE, &moduleCount);
+        if (NT_SUCCESS(status)) {
+            info = moduleCount * sizeof(MODULE_INFO);
+            KdPrint(("[XM] CTL_ENUM_MODULE: 返回 %d 个模块信息\n", moduleCount));
+        }
+    }
+    break;
+    
+    case CTL_ENUM_PROCESS_MODULE_COUNT:
+    {
+        //PPROCESS_MODULE_REQ req = (PPROCESS_MODULE_REQ)Irp->AssociatedIrp.SystemBuffer;
+        //ULONG moduleCount = 0;
+        //status = EnumProcessModuleEx(req->ProcessId, NULL, true, &moduleCount);
+        //if (NT_SUCCESS(status)) {
+        //    *(PULONG)Irp->AssociatedIrp.SystemBuffer = moduleCount;
+        //    info = sizeof(ULONG);
+        //    KdPrint(("[XM] CTL_ENUM_PROCESS_MODULE_COUNT: 进程 %p 有 %d 个模块\n", 
+        //        req->ProcessId, moduleCount));
+        //}
+    }
+    break;
+    
+    case CTL_ENUM_PROCESS_MODULE:
+    {
+        //PPROCESS_MODULE_REQ req = (PPROCESS_MODULE_REQ)Irp->AssociatedIrp.SystemBuffer;
+        //ULONG moduleCount = req->ModuleCount;
+        //status = EnumProcessModuleEx(req->ProcessId, (PMODULE_INFO)Irp->AssociatedIrp.SystemBuffer,
+        //    false, &moduleCount);
+        //if (NT_SUCCESS(status)) {
+        //    info = moduleCount * sizeof(MODULE_INFO);
+        //    KdPrint(("[XM] CTL_ENUM_PROCESS_MODULE: 进程 %p 返回 %d 个模块信息\n", 
+        //        req->ProcessId, moduleCount));
+        //}
+    }
+    break;
+
     case CTL_READ_MEM:
     {
         PKERNEL_RW_REQ req = (PKERNEL_RW_REQ)Irp->AssociatedIrp.SystemBuffer;
@@ -404,3 +551,85 @@ NTSTATUS DriverEntry(
     
     return status;
 }
+
+//// 枚举指定进程的模块
+//NTSTATUS EnumProcessModuleEx(HANDLE ProcessId, PMODULE_INFO ModuleBuffer, bool CountOnly, PULONG ModuleCount)
+//{
+//    NTSTATUS Status;
+//    PEPROCESS Process;
+//    KAPC_STATE ApcState;
+//    PVOID BaseAddress = NULL;
+//    MEMORY_BASIC_INFORMATION MemInfo;
+//    SIZE_T ReturnLength;
+//    ULONG Count = 0;
+//    
+//    KdPrint(("[XM] EnumProcessModuleEx: ProcessId=%p, CountOnly=%d\n", ProcessId, CountOnly));
+//    
+//    // 获取进程对象
+//    Status = PsLookupProcessByProcessId(ProcessId, &Process);
+//    if (!NT_SUCCESS(Status)) {
+//        KdPrint(("[XM] EnumProcessModuleEx: PsLookupProcessByProcessId failed: 0x%X\n", Status));
+//        return Status;
+//    }
+//    
+//    KeStackAttachProcess(Process, &ApcState);
+//    
+//    __try {
+//        // 遍历进程的虚拟地址空间
+//        while (BaseAddress < (PVOID)0x7FFFFFFF) {  // 用户模式地址空间上限
+//            Status = ZwQueryVirtualMemory(
+//                ZwCurrentProcess(),  // 当前进程句柄（已附加到目标进程）
+//                BaseAddress,
+//                MemoryBasicInformation,
+//                &MemInfo,
+//                sizeof(MemInfo),
+//                &ReturnLength
+//            );
+//            
+//            if (!NT_SUCCESS(Status)) {
+//                break;
+//            }
+//            
+//            // 检查是否为映像文件（DLL/EXE）
+//            if (MemInfo.Type == MEM_IMAGE && MemInfo.State == MEM_COMMIT) {
+//                if (!CountOnly && ModuleBuffer && Count < *ModuleCount) {
+//                    // 填充模块信息
+//                    RtlZeroMemory(&ModuleBuffer[Count], sizeof(MODULE_INFO));
+//                    
+//                    // 设置基地址和大小
+//                    ModuleBuffer[Count].ImageBase = MemInfo.AllocationBase;
+//                    ModuleBuffer[Count].ImageSize = (ULONG)MemInfo.RegionSize;
+//                    
+//                    // 模块名称（使用内核安全的字符串函数）
+//                    RtlStringCbPrintfA(ModuleBuffer[Count].Name, sizeof(ModuleBuffer[Count].Name), 
+//                                      "Module_%p", MemInfo.AllocationBase);
+//                    RtlStringCbPrintfA(ModuleBuffer[Count].FullPath, sizeof(ModuleBuffer[Count].FullPath), 
+//                                      "Unknown_Path_%p", MemInfo.AllocationBase);
+//                    
+//                    ModuleBuffer[Count].LoadOrderIndex = (USHORT)Count;
+//                    ModuleBuffer[Count].LoadCount = 1;
+//                    
+//                    KdPrint(("[XM] ProcessModule[%d]: Base=%p, Size=0x%X\n",
+//                        Count, ModuleBuffer[Count].ImageBase, ModuleBuffer[Count].ImageSize));
+//                }
+//                Count++;
+//            }
+//            
+//            // 移动到下一个内存区域
+//            BaseAddress = (PVOID)((ULONG_PTR)MemInfo.BaseAddress + MemInfo.RegionSize);
+//        }
+//    }
+//    __except (EXCEPTION_EXECUTE_HANDLER) {
+//        KdPrint(("[XM] EnumProcessModuleEx: Exception occurred\n"));
+//        Status = STATUS_UNSUCCESSFUL;
+//    }
+//    
+//    KeUnstackDetachProcess(&ApcState);
+//
+//    ObDereferenceObject(Process);
+//    
+//    *ModuleCount = Count;
+//    
+//    KdPrint(("[XM] EnumProcessModuleEx: Found %d modules\n", Count));
+//    return STATUS_SUCCESS;
+//}

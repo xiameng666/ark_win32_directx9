@@ -309,3 +309,93 @@ BOOL ArkR3::MemAttachWrite(DWORD ProcessId, ULONG VirtualAddress, DWORD Size)
     free(pBuffer);
     return bResult;
 }
+
+// 获取内核模块数量
+DWORD ArkR3::ModuleGetCount()
+{
+    DWORD dwBytes = 0;
+    DWORD dwEntryNum = 0;
+
+    DeviceIoControl(m_hDriver, CTL_ENUM_MODULE_COUNT, NULL, NULL, &dwEntryNum, sizeof(DWORD), &dwBytes, NULL);
+
+    return dwEntryNum;
+}
+
+//获取内核模块信息
+std::vector<MODULE_INFO> ArkR3::ModuleGetVec(DWORD moduleCount)
+{
+    DWORD dwRetBytes;
+    DWORD dwBufferSize = sizeof(MODULE_INFO) * moduleCount;
+    PMODULE_INFO pEntryInfo = (PMODULE_INFO)malloc(dwBufferSize);
+    BOOL bResult = DeviceIoControl(m_hDriver, CTL_ENUM_MODULE, NULL, NULL, pEntryInfo, dwBufferSize, &dwRetBytes, NULL);
+
+    MoudleVec_.clear();
+    
+    DWORD Count = 0;
+    if (bResult) {
+        Count = dwRetBytes / sizeof(MODULE_INFO);
+        for (DWORD i = 0; i < Count; i++) {
+            MODULE_INFO mInfo = pEntryInfo[i];     
+            MoudleVec_.emplace_back(mInfo);           
+
+            Log("ModuleGetVec 模块[%d]: 名称=%s, 基地址=%p, 大小=0x%X, 路径=%s\n",
+                i, mInfo.Name, mInfo.ImageBase, mInfo.ImageSize, mInfo.FullPath);
+        }
+    }
+
+    free(pEntryInfo);
+    return MoudleVec_;
+}
+
+// 获取指定进程的模块数量
+DWORD ArkR3::ProcessModuleGetCount(DWORD processId)
+{
+    DWORD dwBytes = 0;
+    DWORD dwEntryNum = 0;
+    
+    PROCESS_MODULE_REQ req;
+    req.ProcessId = (HANDLE)processId;
+    req.ModuleCount = 0;
+
+    DeviceIoControl(m_hDriver, CTL_ENUM_PROCESS_MODULE_COUNT, &req, sizeof(req), 
+                   &dwEntryNum, sizeof(DWORD), &dwBytes, NULL);
+
+    return dwEntryNum;
+}
+
+// 获取指定进程的模块信息
+std::vector<MODULE_INFO> ArkR3::ProcessModuleGetVec(DWORD processId, DWORD moduleCount)
+{
+    DWORD dwRetBytes;
+    DWORD dwBufferSize = sizeof(MODULE_INFO) * moduleCount;
+    PMODULE_INFO pEntryInfo = (PMODULE_INFO)malloc(dwBufferSize);
+    
+    PROCESS_MODULE_REQ req;
+    req.ProcessId = (HANDLE)processId;
+    req.ModuleCount = moduleCount;
+    
+    // 将请求结构复制到缓冲区开头
+    memcpy(pEntryInfo, &req, sizeof(req));
+    
+    BOOL bResult = DeviceIoControl(m_hDriver, CTL_ENUM_PROCESS_MODULE, 
+                                  pEntryInfo, dwBufferSize, 
+                                  pEntryInfo, dwBufferSize, &dwRetBytes, NULL);
+
+    ProcessModuleVec_.clear();
+    
+    DWORD Count = 0;
+    if (bResult) {
+        Count = dwRetBytes / sizeof(MODULE_INFO);
+        for (DWORD i = 0; i < Count; i++) {
+            MODULE_INFO mInfo = pEntryInfo[i];     
+            ProcessModuleVec_.emplace_back(mInfo);           
+
+            Log("ProcessModuleGetVec 进程[%d]模块[%d]: 名称=%s, 基地址=%p, 大小=0x%X\n",
+                processId, i, mInfo.Name, mInfo.ImageBase, mInfo.ImageSize);
+        }
+    }
+    
+    free(pEntryInfo);
+
+    return ProcessModuleVec_;
+}
