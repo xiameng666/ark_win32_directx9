@@ -354,45 +354,69 @@ NTSTATUS DispatchDeviceControl(
     break;
     case CTL_ENUM_PROCESS_COUNT:
     {
-        ULONG processCount = 0;
-        status = EnumProcessEx(NULL, true, &processCount); 
-        if (NT_SUCCESS(status)) {
-            *(PULONG)Irp->AssociatedIrp.SystemBuffer = processCount;
-            info = sizeof(ULONG);
-            KdPrint(("[XM] CTL_ENUM_PROCESS_COUNT: %d 个进程\n", processCount));
+        __try {
+            ULONG processCount = 0;
+            status = EnumProcessEx(NULL, true, &processCount); 
+            if (NT_SUCCESS(status)) {
+                *(PULONG)Irp->AssociatedIrp.SystemBuffer = processCount;
+                info = sizeof(ULONG);
+                KdPrint(("[XM] CTL_ENUM_PROCESS_COUNT: %d 个进程\n", processCount));
+            }
+        }
+        __except (EXCEPTION_EXECUTE_HANDLER) {
+            status = STATUS_UNSUCCESSFUL;
+            KdPrint(("[XM] CTL_ENUM_PROCESS_COUNT exception\n"));
         }
     }
     break;
     case CTL_ENUM_PROCESS:
     {
-        ULONG processCount = 0;
-        status = EnumProcessEx((PPROCESS_INFO)Irp->AssociatedIrp.SystemBuffer,
-            false, &processCount);
-        if (NT_SUCCESS(status)) {
-            info = processCount * sizeof(PROCESS_INFO);
-            KdPrint(("[XM] CTL_ENUM_PROCESS: 返回 %d 个进程信息\n", processCount));
+        __try {
+            ULONG processCount = 0;
+            status = EnumProcessEx((PPROCESS_INFO)Irp->AssociatedIrp.SystemBuffer,
+                false, &processCount);
+            if (NT_SUCCESS(status)) {
+                info = processCount * sizeof(PROCESS_INFO);
+                KdPrint(("[XM] CTL_ENUM_PROCESS: 返回 %d 个进程信息\n", processCount));
+            }
+        }
+        __except (EXCEPTION_EXECUTE_HANDLER) {
+            status = STATUS_UNSUCCESSFUL;
+            KdPrint(("[XM] CTL_ENUM_PROCESS exception\n"));
         }
     }
     break;
     case CTL_ENUM_MODULE_COUNT:
     {
-        ULONG moduleCount = 0;
-        status = EnumModuleEx(NULL, TRUE, &moduleCount);
-        if (NT_SUCCESS(status)) {
-            *(PULONG)Irp->AssociatedIrp.SystemBuffer = moduleCount;
-            info = sizeof(ULONG);
-            KdPrint(("[XM] CTL_ENUM_MODULE_COUNT: %d 个模块\n", moduleCount));
+        __try {
+            ULONG moduleCount = 0;
+            status = EnumModuleEx(NULL, TRUE, &moduleCount);
+            if (NT_SUCCESS(status)) {
+                *(PULONG)Irp->AssociatedIrp.SystemBuffer = moduleCount;
+                info = sizeof(ULONG);
+                KdPrint(("[XM] CTL_ENUM_MODULE_COUNT: %d 个模块\n", moduleCount));
+            }
+        }
+        __except (EXCEPTION_EXECUTE_HANDLER) {
+            status = STATUS_UNSUCCESSFUL;
+            KdPrint(("[XM] CTL_ENUM_MODULE_COUNT exception\n"));
         }
     }
     break;
     case CTL_ENUM_MODULE:
     {
-        ULONG moduleCount = 0;
-        status = EnumModuleEx((PMODULE_INFO)Irp->AssociatedIrp.SystemBuffer,
-            FALSE, &moduleCount);
-        if (NT_SUCCESS(status)) {
-            info = moduleCount * sizeof(MODULE_INFO);
-            KdPrint(("[XM] CTL_ENUM_MODULE: 返回 %d 个模块信息\n", moduleCount));
+        __try {
+            ULONG moduleCount = 0;
+            status = EnumModuleEx((PMODULE_INFO)Irp->AssociatedIrp.SystemBuffer,
+                FALSE, &moduleCount);
+            if (NT_SUCCESS(status)) {
+                info = moduleCount * sizeof(MODULE_INFO);
+                KdPrint(("[XM] CTL_ENUM_MODULE: 返回 %d 个模块信息\n", moduleCount));
+            }
+        }
+        __except (EXCEPTION_EXECUTE_HANDLER) {
+            status = STATUS_UNSUCCESSFUL;
+            KdPrint(("[XM] CTL_ENUM_MODULE exception\n"));
         }
     }
     break;
