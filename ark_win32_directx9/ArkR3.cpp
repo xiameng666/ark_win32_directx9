@@ -124,6 +124,34 @@ std::vector<GDT_INFO> ArkR3::GDTGetVec()
                 gdtInfo.system = pDesc->s;          // 系统段标志
                 gdtInfo.p = pDesc->p;               // 存在位
 
+                //系统段解析
+                const char* segmentType = " ";
+                if (gdtInfo.system == 0) {          // 系统段
+                    switch (gdtInfo.type) {
+                    case 1: segmentType = "16-bit TSS (Available)"; break;
+                    case 2: segmentType = "LDT"; break;
+                    case 3: segmentType = "16-bit TSS (Busy)"; break;
+                    case 4: segmentType = "16-bit Call Gate"; break;
+                    case 5: segmentType = "Task Gate"; break;
+                    case 6: segmentType = "16-bit Interrupt Gate"; break;
+                    case 7: segmentType = "16-bit Trap Gate"; break;
+                    case 9: segmentType = "32-bit TSS (Available)"; break;
+                    case 11: segmentType = "32-bit TSS (Busy)"; break;
+                    case 12: segmentType = "32-bit Call Gate"; break;
+                    case 14: segmentType = "32-bit Interrupt Gate"; break;
+                    case 15: segmentType = "32-bit Trap Gate"; break;
+                    }
+                }
+                else {
+                    if (gdtInfo.type & 8) {  // 代码段
+                        segmentType = (gdtInfo.type & 2) ? "Code (R E)" : "Code (E)";
+                    }
+                    else {  // 数据段
+                        segmentType = (gdtInfo.type & 2) ? "Data (R W E)" : "Data (R E)";
+                    }
+                }
+                strcpy_s(gdtInfo.typeDesc, sizeof(gdtInfo.typeDesc), segmentType);
+
                 GDTVec_.emplace_back(gdtInfo);
                 Log("GetGDTVec  [%02d] Sel:0x%04X Base:0x%08X Limit:0x%08X DPL:%d Type:0x%X %s\n",
                     index, gdtInfo.selector, (DWORD)gdtInfo.base, gdtInfo.limit,
@@ -336,6 +364,20 @@ std::vector<MODULE_INFO> ArkR3::ModuleGetVec(DWORD moduleCount)
         Count = dwRetBytes / sizeof(MODULE_INFO);
         for (DWORD i = 0; i < Count; i++) {
             MODULE_INFO mInfo = pEntryInfo[i];     
+
+            // 处理完整路径
+            std::string fullPath = mInfo.FullPath;
+            if (fullPath.find("\\SystemRoot\\") == 0) {
+                fullPath = "C:\\Windows\\" + fullPath.substr(12);
+            }
+            else if (fullPath.find("\\WINDOWS\\") == 0) {
+                fullPath = "C:\\Windows\\" + fullPath.substr(9);
+            }
+            else if (fullPath.find("\\??\\C:") == 0) {
+                fullPath = "C:" + fullPath.substr(6);
+            }
+            strcpy_s(mInfo.FullPath, sizeof(mInfo.FullPath), fullPath.c_str());
+
             MoudleVec_.emplace_back(mInfo);           
 
             Log("ModuleGetVec 模块[%d]: 名称=%s, 基地址=%p, 大小=0x%X, 路径=%s\n",

@@ -1,11 +1,8 @@
 ﻿#include "driver.h"
 
-#ifndef MEM_IMAGE
-#define MEM_IMAGE   0x1000000   // 镜像文件映射的内存类型
-#endif
-
 ULONG g_TestValue = 0x11223344;
 ULONG g_WindowsVersion = 0;
+BOOLEAN g_LogOn = FALSE;  // 日志开关
 
 extern "C"
 NTSTATUS NTAPI ZwQuerySystemInformation(
@@ -26,7 +23,7 @@ NTSTATUS EnumModuleEx(PMODULE_INFO ModuleBuffer, bool CountOnly, PULONG ModuleCo
     ULONG i;
     ULONG Count = 0;
 
-    KdPrint(("[XM] EnumModuleEx: CountOnly=%d\n", CountOnly));
+    Log("[XM] EnumModuleEx: CountOnly=%d\n", CountOnly);
 
 retry:
     Buffer = ExAllocatePoolWithTag(NonPagedPool, BufferSize, 'MDLE');
@@ -85,11 +82,11 @@ retry:
             ModuleBuffer[i].LoadCount = ModuleInfo->LoadCount;
             
             
-            KdPrint(("[XM] Module[%d]: Name=%s, Base=%p, Size=0x%X\n",
-                i, ModuleBuffer[i].Name, ModuleBuffer[i].ImageBase, ModuleBuffer[i].ImageSize));
+            Log("[XM] Module[%d]: Name=%s, Base=%p, Size=0x%X\n",
+                i, ModuleBuffer[i].Name, ModuleBuffer[i].ImageBase, ModuleBuffer[i].ImageSize);
         }
         __except (EXCEPTION_EXECUTE_HANDLER) {
-            KdPrint(("[XM] EnumModuleEx: Exception processing module %d\n", i));
+            Log("[XM] EnumProcessModuleEx: Exception processing module %d\n", i);
             continue;
         }
     }
@@ -97,6 +94,22 @@ retry:
     *ModuleCount = Count;
     ExFreePool(Buffer);
     return STATUS_SUCCESS;
+}
+
+void Log(const char* Format, ...)
+{
+    if (!g_LogOn) {
+        return;
+    }
+
+    char buffer[512];
+    va_list args;
+    va_start(args, Format);
+
+    RtlStringCbVPrintfA(buffer, sizeof(buffer), Format, args);
+    va_end(args);
+
+    DbgPrint("%s", buffer);
 }
 
 NTSTATUS DetectWindowsVersion()
@@ -110,14 +123,14 @@ NTSTATUS DetectWindowsVersion()
 
     if (versionInfo.dwMajorVersion == 5) {
         g_WindowsVersion = WinXP;
-        KdPrint(("[XM] Version: WinXP\n"));
+        Log(("[XM] Version: WinXP\n"));
     }
     else if (versionInfo.dwMajorVersion == 6 && versionInfo.dwMinorVersion == 1) {
         g_WindowsVersion = Win7;
-        KdPrint(("[XM] Version: Win7\n"));
+        Log(("[XM] Version: Win7\n"));
     }
     else {
-        KdPrint(("[XM] Version: Other\n"));
+        Log(("[XM] Version: Other\n"));
         return STATUS_NOT_SUPPORTED;
     }
 
@@ -134,26 +147,25 @@ NTSTATUS AttachReadVirtualMem(HANDLE ProcessId, PVOID BaseAddress, PVOID Buffer,
 
     Status = PsLookupProcessByProcessId(ProcessId, &Process);
     if (!NT_SUCCESS(Status)) {
-        KdPrint(("[XM] AttachReadVirtualMem PsLookupProcessByProcessId Status:%08X\n", Status));
+        Log("[XM] AttachReadVirtualMem PsLookupProcessByProcessId Status:%08X\n", Status);
         return Status;
     }
-    KdPrint(("[XM] AttachReadVirtualMem PEPROCESS:%p\n", Process));
+    Log("[XM] AttachReadVirtualMem PEPROCESS:%p\n", Process);
 
     KeRaiseIrql(DISPATCH_LEVEL, &OldIrql);
-    KeStackAttachProcess(Process, &ApcState);//切换CR3
+    KeStackAttachProcess(Process, &ApcState);
 
     PhysicalAddress = MmGetPhysicalAddress(BaseAddress);
-    KdPrint(("[XM] AttachReadVirtualMem PhysicalAddress: 0x%08X\n", PhysicalAddress.LowPart));
+    Log("[XM] AttachReadVirtualMem PhysicalAddress: 0x%08X\n", PhysicalAddress.LowPart);
     
     PVOID lpMapBase = MmMapIoSpace(PhysicalAddress, ReadBytes, MmNonCached);
     if (lpMapBase != NULL) {
-        KdPrint(("[XM] AttachReadVirtualMem MmMapIoSpace lpMapBase: %p\n", lpMapBase));
+        Log("[XM] AttachReadVirtualMem MmMapIoSpace lpMapBase: %p\n", lpMapBase);
         RtlCopyMemory(Buffer, lpMapBase, ReadBytes);
         MmUnmapIoSpace(lpMapBase, ReadBytes);
         Status = STATUS_SUCCESS;
     } else {
-        KdPrint(("[XM] AttachReadVirtualMem MmMapIoSpace Failed\n"));
-        MmUnmapIoSpace(lpMapBase, ReadBytes);
+        Log("[XM] AttachReadVirtualMem MmMapIoSpace Failed\n");
         return Status;
     }
 
@@ -177,36 +189,34 @@ NTSTATUS AttachWriteVirtualMem(HANDLE ProcessId, PVOID BaseAddress, PVOID Buffer
 
     Status = PsLookupProcessByProcessId(ProcessId, &Process);
     if (!NT_SUCCESS(Status)) {
-        KdPrint(("[XM] AttachWriteVirtualMem PsLookupProcessByProcessId Status:%08X\n", Status));
+        Log("[XM] AttachWriteVirtualMem PsLookupProcessByProcessId Status:%08X\n", Status);
         return Status;
     }
-    KdPrint(("[XM] AttachWriteVirtualMem Process:%p\n", Process));
+    Log("[XM] AttachWriteVirtualMem Process:%p\n", Process);
 
     KeRaiseIrql(DISPATCH_LEVEL, &OldIrql);
-
-    KeStackAttachProcess(Process, &ApcState);//切换CR3
+    KeStackAttachProcess(Process, &ApcState);
 
     PhysicalAddress = MmGetPhysicalAddress(BaseAddress);
 
-    //映射的物理地址为0 不读了 
     if (PhysicalAddress.QuadPart == 0) {
-        KdPrint(("[XM] AttachReadVirtualMem VA: %p (maps to physical 0x0)\n", BaseAddress));
+        Log("[XM] AttachWriteVirtualMem VA: %p (maps to physical 0x0)\n", BaseAddress);
         KeUnstackDetachProcess(&ApcState);
         KeLowerIrql(OldIrql);
         ObDereferenceObject(Process);
         return STATUS_INVALID_ADDRESS;
     }
 
-    KdPrint(("[XM] AttachWriteVirtualMem PhysicalAddress: 0x%08X\n", PhysicalAddress.LowPart));
+    Log("[XM] AttachWriteVirtualMem PhysicalAddress: 0x%08X\n", PhysicalAddress.LowPart);
     
     PVOID lpMapBase = MmMapIoSpace(PhysicalAddress, WriteBytes, MmCached);
     if (lpMapBase != NULL) {
         RtlCopyMemory(lpMapBase, Buffer, WriteBytes);
         MmUnmapIoSpace(lpMapBase, WriteBytes);
         Status = STATUS_SUCCESS;
-        KdPrint(("[XM] AttachWriteVirtualMem MmMapIoSpace Success: %p\n", lpMapBase));
+        Log("[XM] AttachWriteVirtualMem MmMapIoSpace Success: %p\n", lpMapBase);
     } else {
-        KdPrint(("[XM] AttachWriteVirtualMem MmMapIoSpace Failed\n"));
+        Log("[XM] AttachWriteVirtualMem MmMapIoSpace Failed\n");
         MmUnmapIoSpace(lpMapBase, WriteBytes);
         return Status;
     }
@@ -233,7 +243,7 @@ NTSTATUS DispatchCreate(
 {
     UNREFERENCED_PARAMETER(DeviceObject);
 
-    KdPrint(("[XM] %s\n", __FUNCTION__));
+    Log("[XM] %s\n", __FUNCTION__);
 
     return CompleteRequest(Irp);
 }
@@ -243,7 +253,7 @@ NTSTATUS DispatchClose(
 {
     UNREFERENCED_PARAMETER(DeviceObject);
 
-    KdPrint(("[XM] %s\n", __FUNCTION__));
+    Log("[XM] %s\n", __FUNCTION__);
 
 
     return CompleteRequest(Irp);
@@ -254,7 +264,7 @@ NTSTATUS DispatchRead(
 {
     UNREFERENCED_PARAMETER(DeviceObject);
 
-    KdPrint(("[XM] %s\n", __FUNCTION__));
+    Log("[XM] %s\n", __FUNCTION__);
 
     return CompleteRequest(Irp);
 }
@@ -264,7 +274,7 @@ NTSTATUS DispatchWrite(
 {
     UNREFERENCED_PARAMETER(DeviceObject);
 
-    KdPrint(("[XM] %s\n", __FUNCTION__));
+    Log("[XM] %s\n", __FUNCTION__);
 
     return CompleteRequest(Irp);
 }
@@ -273,7 +283,7 @@ NTSTATUS DispatchDeviceControl(
     _In_ struct _DEVICE_OBJECT* DeviceObject, _Inout_ struct _IRP* Irp)
 {
     UNREFERENCED_PARAMETER(DeviceObject);
-    KdPrint(("[XM] %s\n", __FUNCTION__));
+    Log("[XM] %s\n", __FUNCTION__);
 
     PIO_STACK_LOCATION stack = IoGetCurrentIrpStackLocation(Irp);
     ULONG code = stack->Parameters.DeviceIoControl.IoControlCode;
@@ -284,8 +294,8 @@ NTSTATUS DispatchDeviceControl(
     {
         PPROCESS_MEM_REQ memReq = (PPROCESS_MEM_REQ)Irp->AssociatedIrp.SystemBuffer;
         __try {
-            KdPrint(("[XM] CTL_ATTACH_MEM_READ ProcessId:%p Address:%p Size:%d\n",
-                    memReq->ProcessId, memReq->VirtualAddress, memReq->Size));
+            Log("[XM] CTL_ATTACH_MEM_READ ProcessId:%p Address:%p Size:%d\n",
+                    memReq->ProcessId, memReq->VirtualAddress, memReq->Size);
             HANDLE processId = memReq->ProcessId;
             PVOID VirtualAddress = memReq->VirtualAddress;
             unsigned Size = memReq->Size;
@@ -295,12 +305,12 @@ NTSTATUS DispatchDeviceControl(
 
             if (NT_SUCCESS(status)) {
                 info = Size;
-                KdPrint(("[XM] CTL_ATTACH_MEM_READ Success\n"));
+                Log("[XM] CTL_ATTACH_MEM_READ Success\n");
             }
         }
         __except (EXCEPTION_EXECUTE_HANDLER) {
             status = STATUS_UNSUCCESSFUL;
-            KdPrint(("[XM] CTL_ATTACH_MEM_READ exception\n"));
+            Log("[XM] CTL_ATTACH_MEM_READ exception\n");
         }
     }
     break;
@@ -308,8 +318,8 @@ NTSTATUS DispatchDeviceControl(
     {
         PPROCESS_MEM_REQ memReq = (PPROCESS_MEM_REQ)Irp->AssociatedIrp.SystemBuffer;
         __try {
-            KdPrint(("[XM] CTL_ATTACH_MEM_WRITE ProcessId:%p Address:%p Size:%d\n",
-                    memReq->ProcessId, memReq->VirtualAddress, memReq->Size));
+            Log("[XM] CTL_ATTACH_MEM_WRITE ProcessId:%p Address:%p Size:%d\n",
+                    memReq->ProcessId, memReq->VirtualAddress, memReq->Size);
 
             //要写的数据在请求头后
             PVOID writeData = (PUCHAR)Irp->AssociatedIrp.SystemBuffer + sizeof(PROCESS_MEM_REQ);
@@ -318,12 +328,12 @@ NTSTATUS DispatchDeviceControl(
 
             if (NT_SUCCESS(status)) {
                 info = sizeof(PROCESS_MEM_REQ);
-                KdPrint(("[XM] CTL_ATTACH_MEM_WRITE Success\n"));
+                Log("[XM] CTL_ATTACH_MEM_WRITE Success\n");
             }
         }
         __except (EXCEPTION_EXECUTE_HANDLER) {
             status = STATUS_UNSUCCESSFUL;
-            KdPrint(("[XM] CTL_ATTACH_MEM_WRITE exception\n"));
+            Log("[XM] CTL_ATTACH_MEM_WRITE exception\n");
         }
     }
     break;
@@ -334,8 +344,8 @@ NTSTATUS DispatchDeviceControl(
             ULONG cpuIndex = gdtReq->CpuIndex;
             GDTR gdtr = gdtReq->Gdtr;
             ULONG gdtSize = gdtr.Limit + 1;
-            KdPrint(("[XM] CpuIndex: %d GdtBase: %08x GdtLimit: %08x, Size: %d\n",
-                cpuIndex, gdtr.Base, gdtr.Limit, gdtSize));
+            Log("[XM] CpuIndex: %d GdtBase: %08x GdtLimit: %08x, Size: %d\n",
+                cpuIndex, gdtr.Base, gdtr.Limit, gdtSize);
 
             //KeSetSystemAffinityThread(cpuIndex);
             KAFFINITY affinity = 1UL << cpuIndex; // 将CPU索引转换为位掩码
@@ -344,11 +354,11 @@ NTSTATUS DispatchDeviceControl(
 
             info = gdtSize;
             status = STATUS_SUCCESS;
-            KdPrint(("[XM] CTL_GET_GDT_DATA finish"));
+            Log("[XM] CTL_GET_GDT_DATA finish");
         }
         __except (EXCEPTION_EXECUTE_HANDLER) {
             status = STATUS_UNSUCCESSFUL;
-            KdPrint(("[XM] CTL_GET_GDT_DATA exception\n"));
+            Log("[XM] CTL_GET_GDT_DATA exception\n");
         }
     }
     break;
@@ -360,12 +370,12 @@ NTSTATUS DispatchDeviceControl(
             if (NT_SUCCESS(status)) {
                 *(PULONG)Irp->AssociatedIrp.SystemBuffer = processCount;
                 info = sizeof(ULONG);
-                KdPrint(("[XM] CTL_ENUM_PROCESS_COUNT: %d 个进程\n", processCount));
+                Log("[XM] CTL_ENUM_PROCESS_COUNT: %d 个进程\n", processCount);
             }
         }
         __except (EXCEPTION_EXECUTE_HANDLER) {
             status = STATUS_UNSUCCESSFUL;
-            KdPrint(("[XM] CTL_ENUM_PROCESS_COUNT exception\n"));
+            Log("[XM] CTL_ENUM_PROCESS_COUNT exception\n");
         }
     }
     break;
@@ -377,12 +387,12 @@ NTSTATUS DispatchDeviceControl(
                 false, &processCount);
             if (NT_SUCCESS(status)) {
                 info = processCount * sizeof(PROCESS_INFO);
-                KdPrint(("[XM] CTL_ENUM_PROCESS: 返回 %d 个进程信息\n", processCount));
+                Log("[XM] CTL_ENUM_PROCESS: 返回 %d 个进程信息\n", processCount);
             }
         }
         __except (EXCEPTION_EXECUTE_HANDLER) {
             status = STATUS_UNSUCCESSFUL;
-            KdPrint(("[XM] CTL_ENUM_PROCESS exception\n"));
+            Log("[XM] CTL_ENUM_PROCESS exception\n");
         }
     }
     break;
@@ -394,12 +404,12 @@ NTSTATUS DispatchDeviceControl(
             if (NT_SUCCESS(status)) {
                 *(PULONG)Irp->AssociatedIrp.SystemBuffer = moduleCount;
                 info = sizeof(ULONG);
-                KdPrint(("[XM] CTL_ENUM_MODULE_COUNT: %d 个模块\n", moduleCount));
+                Log("[XM] CTL_ENUM_MODULE_COUNT: %d 个模块\n", moduleCount);
             }
         }
         __except (EXCEPTION_EXECUTE_HANDLER) {
             status = STATUS_UNSUCCESSFUL;
-            KdPrint(("[XM] CTL_ENUM_MODULE_COUNT exception\n"));
+            Log("[XM] CTL_ENUM_MODULE_COUNT exception\n");
         }
     }
     break;
@@ -411,12 +421,12 @@ NTSTATUS DispatchDeviceControl(
                 FALSE, &moduleCount);
             if (NT_SUCCESS(status)) {
                 info = moduleCount * sizeof(MODULE_INFO);
-                KdPrint(("[XM] CTL_ENUM_MODULE: 返回 %d 个模块信息\n", moduleCount));
+                Log("[XM] CTL_ENUM_MODULE: 返回 %d 个模块信息\n", moduleCount);
             }
         }
         __except (EXCEPTION_EXECUTE_HANDLER) {
             status = STATUS_UNSUCCESSFUL;
-            KdPrint(("[XM] CTL_ENUM_MODULE exception\n"));
+            Log("[XM] CTL_ENUM_MODULE exception\n");
         }
     }
     break;
@@ -429,7 +439,7 @@ NTSTATUS DispatchDeviceControl(
         //if (NT_SUCCESS(status)) {
         //    *(PULONG)Irp->AssociatedIrp.SystemBuffer = moduleCount;
         //    info = sizeof(ULONG);
-        //    KdPrint(("[XM] CTL_ENUM_PROCESS_MODULE_COUNT: 进程 %p 有 %d 个模块\n", 
+        //    Log(("[XM] CTL_ENUM_PROCESS_MODULE_COUNT: 进程 %p 有 %d 个模块\n", 
         //        req->ProcessId, moduleCount));
         //}
     }
@@ -443,7 +453,7 @@ NTSTATUS DispatchDeviceControl(
         //    false, &moduleCount);
         //if (NT_SUCCESS(status)) {
         //    info = moduleCount * sizeof(MODULE_INFO);
-        //    KdPrint(("[XM] CTL_ENUM_PROCESS_MODULE: 进程 %p 返回 %d 个模块信息\n", 
+        //    Log(("[XM] CTL_ENUM_PROCESS_MODULE: 进程 %p 返回 %d 个模块信息\n", 
         //        req->ProcessId, moduleCount));
         //}
     }
@@ -459,8 +469,7 @@ NTSTATUS DispatchDeviceControl(
         }
         __except (EXCEPTION_EXECUTE_HANDLER) {
             status = STATUS_UNSUCCESSFUL;
-            KdPrint(("[XM] Read exception at %p\n", (void*)req->Address));
-
+            Log("[XM] Read exception at %p\n", (void*)req->Address);
         }
     }
     break;
@@ -475,7 +484,7 @@ NTSTATUS DispatchDeviceControl(
         }
         __except (EXCEPTION_EXECUTE_HANDLER) {
             status = STATUS_UNSUCCESSFUL;
-            KdPrint(("[XM] WRITE exception at %p\n", (void*)req->Address));
+            Log("[XM] WRITE exception at %p\n", (void*)req->Address);
         }
 
     }
@@ -502,8 +511,7 @@ VOID Unload(__in struct _DRIVER_OBJECT* DriverObject)
         IoDeleteDevice(DriverObject->DeviceObject);
     }
 
-    KdPrint(("[XM] Unload 完成\n"));
-
+    Log("[XM] Unload 完成\n");
 }
 
 NTSTATUS DriverEntry(
@@ -511,10 +519,10 @@ NTSTATUS DriverEntry(
 {
     UNREFERENCED_PARAMETER(RegistryPath);
 
-    KdPrint(("[XM] g_TestValue address: %p\n", &g_TestValue));
+    Log("[XM] g_TestValue address: %p\n", &g_TestValue);
 
-    KdPrint(("[XM] DriverEntry DriverObject:%p RegistryPath:%wZ\n",
-        DriverObject, RegistryPath));
+    Log("[XM] DriverEntry DriverObject:%p RegistryPath:%wZ\n",
+        DriverObject, RegistryPath);
 
     //设置unload
     DriverObject->DriverUnload = Unload;
@@ -545,10 +553,10 @@ NTSTATUS DriverEntry(
 
         if (!NT_SUCCESS(status))
         {
-            KdPrint(("[XM] Driver Entry IoCreateDevice ErrCode:%08x\n", status));
+            Log("[XM] Driver Entry IoCreateDevice ErrCode:%08x\n", status);
             break;
         }
-        KdPrint(("[XM] Driver Entry IoCreateDevice Ok pDevObj:%p\n", pDevObj));
+        Log("[XM] Driver Entry IoCreateDevice Ok pDevObj:%p\n", pDevObj);
 
         // 设置设备标志
         pDevObj->Flags |= DO_BUFFERED_IO;          // 使用缓冲IO
@@ -561,11 +569,11 @@ NTSTATUS DriverEntry(
         status = IoCreateSymbolicLink(&usSymbolicLinkName, &usDeviceName);
         if (!NT_SUCCESS(status))
         {
-            KdPrint(("[XM] IoCreateSymbolicLink ErrCode:%08x\n", status));
+            Log("[XM] IoCreateSymbolicLink ErrCode:%08x\n", status);
             IoDeleteDevice(pDevObj);
             break;
         }
-        KdPrint(("[XM] IoCreateSymbolicLink Ok\n"));
+        Log("[XM] IoCreateSymbolicLink Ok\n");
 
     } while (false);
 
@@ -587,12 +595,12 @@ NTSTATUS DriverEntry(
 //    SIZE_T ReturnLength;
 //    ULONG Count = 0;
 //    
-//    KdPrint(("[XM] EnumProcessModuleEx: ProcessId=%p, CountOnly=%d\n", ProcessId, CountOnly));
+//    Log(("[XM] EnumProcessModuleEx: ProcessId=%p, CountOnly=%d\n", ProcessId, CountOnly));
 //    
 //    // 获取进程对象
 //    Status = PsLookupProcessByProcessId(ProcessId, &Process);
 //    if (!NT_SUCCESS(Status)) {
-//        KdPrint(("[XM] EnumProcessModuleEx: PsLookupProcessByProcessId failed: 0x%X\n", Status));
+//        Log(("[XM] EnumProcessModuleEx: PsLookupProcessByProcessId failed: 0x%X\n", Status));
 //        return Status;
 //    }
 //    
@@ -633,7 +641,7 @@ NTSTATUS DriverEntry(
 //                    ModuleBuffer[Count].LoadOrderIndex = (USHORT)Count;
 //                    ModuleBuffer[Count].LoadCount = 1;
 //                    
-//                    KdPrint(("[XM] ProcessModule[%d]: Base=%p, Size=0x%X\n",
+//                    Log(("[XM] ProcessModule[%d]: Base=%p, Size=0x%X\n",
 //                        Count, ModuleBuffer[Count].ImageBase, ModuleBuffer[Count].ImageSize));
 //                }
 //                Count++;
@@ -644,7 +652,7 @@ NTSTATUS DriverEntry(
 //        }
 //    }
 //    __except (EXCEPTION_EXECUTE_HANDLER) {
-//        KdPrint(("[XM] EnumProcessModuleEx: Exception occurred\n"));
+//        Log(("[XM] EnumProcessModuleEx: Exception occurred\n"));
 //        Status = STATUS_UNSUCCESSFUL;
 //    }
 //    
@@ -654,6 +662,12 @@ NTSTATUS DriverEntry(
 //    
 //    *ModuleCount = Count;
 //    
-//    KdPrint(("[XM] EnumProcessModuleEx: Found %d modules\n", Count));
+//    Log(("[XM] EnumProcessModuleEx: Found %d modules\n", Count));
 //    return STATUS_SUCCESS;
 //}
+
+
+
+
+
+

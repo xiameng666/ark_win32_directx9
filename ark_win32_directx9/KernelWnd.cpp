@@ -48,10 +48,10 @@ void KernelWnd::RenderGDTTable()
     
     if (filterInvalidSegments) {
         ImGui::SameLine();
-        ImGui::TextColored(COLOR_INFO, u8"(Òþ²Ø Limit=0 ÇÒ NP µÄ¶Î)");
+        ImGui::TextColored(COLOR_INFO, u8"(Òþ²Ø Type=0¡¢Limit=0 ÇÒ NP µÄ¶Î)");
     }
 
-    if (ImGui::BeginTable(u8"GDT", 8, 
+    if (ImGui::BeginTable(u8"GDT", 9, 
         ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody |
         ImGuiTableFlags_ScrollY | ImGuiTableFlags_Resizable |
         ImGuiTableFlags_Sortable)) {
@@ -65,6 +65,7 @@ void KernelWnd::RenderGDTTable()
         ImGui::TableSetupColumn(u8"ÌØÈ¨¼¶");
         ImGui::TableSetupColumn(u8"Present");
         ImGui::TableSetupColumn(u8"Type");
+        ImGui::TableSetupColumn(u8"¶ÎÃèÊö");
 
         ImGui::TableHeadersRow();
     
@@ -76,7 +77,7 @@ void KernelWnd::RenderGDTTable()
             
             if (filterInvalidSegments) {
                 // ¹ýÂË
-                if (gdt.limit == 0 && !gdt.p) {
+                if (gdt.type == 0 || gdt.limit == 0 && !gdt.p) {
                     continue;
                 }
             }
@@ -130,6 +131,10 @@ void KernelWnd::RenderGDTTable()
             // Type 
             ImGui::TableNextColumn();
             ImGui::Text("0x%X", gdt.type);
+
+            // ¶ÎÃèÊö
+            ImGui::TableNextColumn();
+            ImGui::Text("%s", gdt.typeDesc);
         }
     
         ImGui::EndTable();

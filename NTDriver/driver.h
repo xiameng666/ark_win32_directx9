@@ -1,11 +1,14 @@
 ﻿#pragma once
 #include <ntifs.h>
 #include <ntddk.h>
-//#include <ntstrsafe.h>  // 添加字符串安全函数支持
+#include <ntstrsafe.h>  // 添加字符串安全函数支持
+
 #include "../include/proto.h"
 #include "process.h"
 
+
 extern "C" {
+    void Log(const char* Format, ...);
 
     NTSTATUS DetectWindowsVersion();
 

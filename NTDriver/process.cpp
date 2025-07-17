@@ -1,4 +1,5 @@
 #include "process.h"
+#include "driver.h"
 
 extern ULONG g_WindowsVersion;
 ENUM_PROCESS_OFFSETS g_ProcessOffsets;
@@ -43,14 +44,14 @@ PEPROCESS GetCurrentEprocess() {
 //onlyGetCount 判断 获取进程数量还是遍历进程数据
 NTSTATUS EnumProcessEx(PPROCESS_INFO processBuffer, bool onlyGetCount, PULONG processCount) {
     PEPROCESS CurrentProcess = NULL;
-    PEPROCESS StartProcess = NULL;//记录开始的进程避免循环 双向链表
+    PEPROCESS StartProcess = NULL;
     ULONG Counter = 0;
 
     __try {
         StartProcess = GetCurrentEprocess();
         CurrentProcess = StartProcess;
 
-        KdPrint(("[XM] 开始遍历进程，起始EPROCESS: %p\n", CurrentProcess));
+        Log("[XM] 开始遍历进程，起始EPROCESS: %p\n", CurrentProcess);
 
         do {
             // 如果需要拿进程数据
@@ -69,8 +70,8 @@ NTSTATUS EnumProcessEx(PPROCESS_INFO processBuffer, bool onlyGetCount, PULONG pr
                 RtlCopyMemory(pInfo->ImageFileName, ImageFileName, 16);
                 pInfo->ImageFileName[15] = '\0';
 
-                KdPrint(("[XM] 进程[%d]: PID=%d, Name=%s, EPROCESS=%p\n",
-                    Counter, pInfo->ProcessId, pInfo->ImageFileName, CurrentProcess));
+                Log("[XM] 进程[%d]: PID=%d, Name=%s, EPROCESS=%p\n",
+                    Counter, pInfo->ProcessId, pInfo->ImageFileName, CurrentProcess);
             }
 
             Counter++;
@@ -80,16 +81,16 @@ NTSTATUS EnumProcessEx(PPROCESS_INFO processBuffer, bool onlyGetCount, PULONG pr
             ULONG NextLinkAddress = *ActiveProcessLinksPtr;  // 获取Flink
             CurrentProcess = (PEPROCESS)(NextLinkAddress - g_ProcessOffsets.ActiveProcessLinks);  // 减去偏移得到EPROCESS地址
 
-        } while (CurrentProcess != StartProcess && Counter < 1000);//怕无限循环
+        } while (CurrentProcess != StartProcess && Counter < 1000);
 
         *processCount = Counter;
-        KdPrint(("[XM] 遍历完成，总共找到 %d 个进程\n", Counter));
+        Log("[XM] 遍历完成，总共找到 %d 个进程\n", Counter);
 
         return STATUS_SUCCESS;
 
     }
     __except (EXCEPTION_EXECUTE_HANDLER) {
-        KdPrint(("[XM] err EnumerateProcessCount \n"));
+        Log("[XM] err EnumerateProcessCount \n");
         return STATUS_UNSUCCESSFUL;
     }
 }

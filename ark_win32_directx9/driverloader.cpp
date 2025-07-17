@@ -1,6 +1,7 @@
 #include "driverloader.h"
 #include <stdio.h>
 
+// #define LOGON
 
 void DriverLoader::SetPath()
 {
@@ -276,14 +277,16 @@ bool DriverLoader::FastUnload()
 
 void DriverLoader::Log(const char* fmt, ...)
 {
-	char buf[512] = { 0 };
-	va_list args;
-	va_start(args, fmt);
+#ifdef LOGON
+    char buf[512] = { 0 };
+    va_list args;
+    va_start(args, fmt);
     vsnprintf(buf, sizeof(buf), fmt, args);
-	va_end(args);
+    va_end(args);
 
-	OutputDebugString(buf);
-	if (m_pObs) m_pObs->OnLog(buf);
+    OutputDebugString(buf);
+    if (m_pObs) m_pObs->OnLog(buf);
+#endif // LOGON	
 }
 
 void DriverLoader::LogErr(const char* prefix)
