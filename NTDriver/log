@@ -1,0 +1,645 @@
+0: kd> dds 80505450 L284
+80505450  805a5614 nt!NtAcceptConnectPort
+80505454  805f1adc nt!NtAccessCheck
+80505458  805f5312 nt!NtAccessCheckAndAuditAlarm
+8050545c  805f1b0e nt!NtAccessCheckByType
+80505460  805f534c nt!NtAccessCheckByTypeAndAuditAlarm
+80505464  805f1b44 nt!NtAccessCheckByTypeResultList
+80505468  805f5390 nt!NtAccessCheckByTypeResultListAndAuditAlarm
+8050546c  805f53d4 nt!NtAccessCheckByTypeResultListAndAuditAlarmByHandle
+80505470  806163a2 nt!NtAddAtom
+80505474  806170e4 nt!NtAddBootEntry
+80505478  805eceda nt!NtAdjustGroupsToken
+8050547c  805ecb32 nt!NtAdjustPrivilegesToken
+80505480  805d5b3a nt!NtAlertResumeThread
+80505484  805d5aea nt!NtAlertThread
+80505488  806169c8 nt!NtAllocateLocallyUniqueId
+8050548c  805b6f72 nt!NtAllocateUserPhysicalPages
+80505490  80615fe4 nt!NtAllocateUuids
+80505494  805a9a9e nt!NtAllocateVirtualMemory
+80505498  805b1596 nt!NtAreMappedFilesTheSame
+8050549c  805d75fe nt!NtAssignProcessToJobObject
+805054a0  8050288c nt!NtCallbackReturn
+805054a4  806170d6 nt!NtModifyBootEntry
+805054a8  80577ae6 nt!NtCancelIoFile
+805054ac  80539bd2 nt!NtCancelTimer
+805054b0  8060f5b2 nt!NtClearEvent
+805054b4  805bd4ec nt!NtClose
+805054b8  805f584c nt!NtCloseObjectAuditAlarm
+805054bc  80624356 nt!NtCompactKeys
+805054c0  805f9d3e nt!NtCompareTokens
+805054c4  805a5d02 nt!NtCompleteConnectPort
+805054c8  806245aa nt!NtCompressKey
+805054cc  805a55b4 nt!NtConnectPort
+805054d0  80545e6c nt!NtContinue
+805054d4  80642e7c nt!NtCreateDebugObject
+805054d8  805bf49c nt!NtCreateDirectoryObject
+805054dc  8060f602 nt!NtCreateEvent
+805054e0  8061795a nt!NtCreateEventPair
+805054e4  8057a084 nt!NtCreateFile
+805054e8  80579a62 nt!NtCreateIoCompletion
+805054ec  805d65c2 nt!NtCreateJobObject
+805054f0  805d62fa nt!NtCreateJobSet
+805054f4  80624786 nt!NtCreateKey
+805054f8  8057a192 nt!NtCreateMailslotFile
+805054fc  80617d52 nt!NtCreateMutant
+80505500  8057a0be nt!NtCreateNamedPipeFile
+80505504  805ac9d4 nt!NtCreatePagingFile
+80505508  805a60d0 nt!NtCreatePort
+8050550c  805d21ec nt!NtCreateProcess
+80505510  805d2136 nt!NtCreateProcessEx
+80505514  80618172 nt!NtCreateProfile
+80505518  805ac3ae nt!NtCreateSection
+8050551c  80615702 nt!NtCreateSemaphore
+80505520  805c49b6 nt!NtCreateSymbolicLinkObject
+80505524  805d1fd4 nt!NtCreateThread
+80505528  80617622 nt!NtCreateTimer
+8050552c  805fa0e6 nt!NtCreateToken
+80505530  805a60f4 nt!NtCreateWaitablePort
+80505534  80643f58 nt!NtDebugActiveProcess
+80505538  806440a8 nt!NtDebugContinue
+8050553c  80617026 nt!NtDelayExecution
+80505540  80616858 nt!NtDeleteAtom
+80505544  806170d6 nt!NtModifyBootEntry
+80505548  80577c2c nt!NtDeleteFile
+8050554c  80624c16 nt!NtDeleteKey
+80505550  805f5958 nt!NtDeleteObjectAuditAlarm
+80505554  80624de6 nt!NtDeleteValueKey
+80505558  8057a24a nt!NtDeviceIoControlFile
+8050555c  80613680 nt!NtDisplayString
+80505560  805befc4 nt!NtDuplicateObject
+80505564  805edd88 nt!NtDuplicateToken
+80505568  806170e4 nt!NtAddBootEntry
+8050556c  80624fc6 nt!NtEnumerateKey
+80505570  806170c8 nt!NtEnumerateSystemEnvironmentValuesEx
+80505574  80625230 nt!NtEnumerateValueKey
+80505578  805b4c9e nt!NtExtendSection
+8050557c  805edf34 nt!NtFilterToken
+80505580  8061660c nt!NtFindAtom
+80505584  80577cf8 nt!NtFlushBuffersFile
+80505588  805b7806 nt!NtFlushInstructionCache
+8050558c  8062549a nt!NtFlushKey
+80505590  805ad6e8 nt!NtFlushVirtualMemory
+80505594  805b77a8 nt!NtFlushWriteBuffer
+80505598  805b7314 nt!NtFreeUserPhysicalPages
+8050559c  805b3f7e nt!NtFreeVirtualMemory
+805055a0  8057a27e nt!NtFsControlFile
+805055a4  805d24e6 nt!NtGetContextThread
+805055a8  805c9640 nt!NtGetDevicePowerState
+805055ac  8059a116 nt!NtGetPlugPlayEvent
+805055b0  8052217a nt!NtGetWriteWatch
+805055b4  805f9a32 nt!NtImpersonateAnonymousToken
+805055b8  805a615e nt!NtImpersonateClientOfPort
+805055bc  805d87be nt!NtImpersonateThread
+805055c0  806228dc nt!NtInitializeRegistry
+805055c4  805c9426 nt!NtInitiatePowerAction
+805055c8  805d61be nt!NtIsProcessInJob
+805055cc  805c962c nt!NtIsSystemResumeAutomatic
+805055d0  805a636a nt!NtListenPort
+805055d4  8058513a nt!NtLoadDriver
+805055d8  80626982 nt!NtLoadKey
+805055dc  8062658e nt!NtLoadKey2
+805055e0  8057a2b2 nt!NtLockFile
+805055e4  80613c72 nt!NtLockProductActivationKeys
+805055e8  80624656 nt!NtLockRegistryKey
+805055ec  805b790e nt!NtLockVirtualMemory
+805055f0  805bf292 nt!NtMakePermanentObject
+805055f4  805bd590 nt!NtMakeTemporaryObject
+805055f8  805b63d2 nt!NtMapUserPhysicalPages
+805055fc  805b6922 nt!NtMapUserPhysicalPagesScatter
+80505600  805b3006 nt!NtMapViewOfSection
+80505604  806170d6 nt!NtModifyBootEntry
+80505608  8057aeca nt!NtNotifyChangeDirectoryFile
+8050560c  8062694c nt!NtNotifyChangeKey
+80505610  8062559c nt!NtNotifyChangeMultipleKeys
+80505614  805bf56e nt!NtOpenDirectoryObject
+80505618  8060f702 nt!NtOpenEvent
+8050561c  80617a32 nt!NtOpenEventPair
+80505620  8057b182 nt!NtOpenFile
+80505624  80579b3a nt!NtOpenIoCompletion
+80505628  805d6748 nt!NtOpenJobObject
+8050562c  80625b58 nt!NtOpenKey
+80505630  80617e2a nt!NtOpenMutant
+80505634  805f541a nt!NtOpenObjectAuditAlarm
+80505638  805cc3fc nt!NtOpenProcess
+8050563c  805ee722 nt!NtOpenProcessToken
+80505640  805ee386 nt!NtOpenProcessTokenEx
+80505644  805ab3d2 nt!NtOpenSection
+80505648  806157fc nt!NtOpenSemaphore
+8050564c  805c4b9c nt!NtOpenSymbolicLinkObject
+80505650  805cc688 nt!NtOpenThread
+80505654  805ee740 nt!NtOpenThreadToken
+80505658  805ee4f6 nt!NtOpenThreadTokenEx
+8050565c  80617744 nt!NtOpenTimer
+80505660  8064614a nt!NtPlugPlayControl
+80505664  805ca4ae nt!NtPowerInformation
+80505668  805f8ae4 nt!NtPrivilegeCheck
+8050566c  805f472c nt!NtPrivilegeObjectAuditAlarm
+80505670  805f4918 nt!NtPrivilegedServiceAuditAlarm
+80505674  805b93da nt!NtProtectVirtualMemory
+80505678  8060f7ba nt!NtPulseEvent
+8050567c  80577ed6 nt!NtQueryAttributesFile
+80505680  806170e4 nt!NtAddBootEntry
+80505684  806170e4 nt!NtAddBootEntry
+80505688  80540bb6 nt!NtQueryDebugFilterState
+8050568c  806113ac nt!NtQueryDefaultLocale
+80505690  8061200c nt!NtQueryDefaultUILanguage
+80505694  8057ae64 nt!NtQueryDirectoryFile
+80505698  805bf60e nt!NtQueryDirectoryObject
+8050569c  8057b1b2 nt!NtQueryEaFile
+805056a0  8060f882 nt!NtQueryEvent
+805056a4  8057802a nt!NtQueryFullAttributesFile
+805056a8  80616880 nt!NtQueryInformationAtom
+805056ac  8057ba1e nt!NtQueryInformationFile
+805056b0  805d6c1a nt!NtQueryInformationJobObject
+805056b4  805a63c8 nt!NtQueryInformationPort
+805056b8  805cdf50 nt!NtQueryInformationProcess
+805056bc  805ccb7e nt!NtQueryInformationThread
+805056c0  805ee820 nt!NtQueryInformationToken
+805056c4  806117aa nt!NtQueryInstallUILanguage
+805056c8  806185f4 nt!NtQueryIntervalProfile
+805056cc  80579be2 nt!NtQueryIoCompletion
+805056d0  80625e7e nt!NtQueryKey
+805056d4  806238d4 nt!NtQueryMultipleValueKey
+805056d8  80617ed2 nt!NtQueryMutant
+805056dc  805c6288 nt!NtQueryObject
+805056e0  80623f80 nt!NtQueryOpenSubKeys
+805056e4  80618682 nt!NtQueryPerformanceCounter
+805056e8  8057c800 nt!NtQueryQuotaInformationFile
+805056ec  805b959c nt!NtQuerySection
+805056f0  805c1056 nt!NtQuerySecurityObject
+805056f4  806158b4 nt!NtQuerySemaphore
+805056f8  805c4c3c nt!NtQuerySymbolicLinkObject
+805056fc  80617100 nt!NtQuerySystemEnvironmentValue
+80505700  806170ba nt!NtSetSystemEnvironmentValueEx
+80505704  8061208c nt!NtQuerySystemInformation
+80505708  8061384c nt!NtQuerySystemTime
+8050570c  806177fc nt!NtQueryTimer
+80505710  806138de nt!NtQueryTimerResolution
+80505714  806229be nt!NtQueryValueKey
+80505718  805b9c2a nt!NtQueryVirtualMemory
+8050571c  8057ccea nt!NtQueryVolumeInformationFile
+80505720  805d2232 nt!NtQueueApcThread
+80505724  80545eb4 nt!NtRaiseException
+80505728  80615526 nt!NtRaiseHardError
+8050572c  8057d48a nt!NtReadFile
+80505730  8057d9f4 nt!NtReadFileScatter
+80505734  805a6e50 nt!NtReadRequestData
+80505738  805b528a nt!NtReadVirtualMemory
+8050573c  805d3754 nt!NtRegisterThreadTerminatePort
+80505740  8061800a nt!NtReleaseMutant
+80505744  806159e4 nt!NtReleaseSemaphore
+80505748  80579eda nt!NtRemoveIoCompletion
+8050574c  80644028 nt!NtRemoveProcessDebug
+80505750  806241a8 nt!NtRenameKey
+80505754  80626832 nt!NtReplaceKey
+80505758  805a64d0 nt!NtReplyPort
+8050575c  805a7498 nt!NtReplyWaitReceivePort
+80505760  805a6ea0 nt!NtReplyWaitReceivePortEx
+80505764  805a67ba nt!NtReplyWaitReplyPort
+80505768  805c95be nt!NtRequestDeviceWakeup
+8050576c  805a3a2e nt!NtRequestPort
+80505770  805a3d5a nt!NtRequestWaitReplyPort
+80505774  805c93cc nt!NtRequestWakeupLatency
+80505778  8060f994 nt!NtResetEvent
+8050577c  80522662 nt!NtResetWriteWatch
+80505780  8062613e nt!NtRestoreKey
+80505784  805d5a94 nt!NtResumeProcess
+80505788  805d5976 nt!NtResumeThread
+8050578c  8062623a nt!NtSaveKey
+80505790  80626320 nt!NtSaveKeyEx
+80505794  80626448 nt!NtSaveMergedKeys
+80505798  805a4d48 nt!NtSecureConnectPort
+8050579c  806170e4 nt!NtAddBootEntry
+805057a0  806170e4 nt!NtAddBootEntry
+805057a4  805d26f6 nt!NtSetContextThread
+805057a8  80646ce0 nt!NtSetDebugFilterState
+805057ac  806153d0 nt!NtSetDefaultHardErrorPort
+805057b0  806114fc nt!NtSetDefaultLocale
+805057b4  80611d6e nt!NtSetDefaultUILanguage
+805057b8  8057b6c6 nt!NtSetEaFile
+805057bc  8060fa54 nt!NtSetEvent
+805057c0  8060fb1e nt!NtSetEventBoostPriority
+805057c4  80617cee nt!NtSetHighEventPair
+805057c8  80617c1e nt!NtSetHighWaitLowEventPair
+805057cc  806439f2 nt!NtSetInformationDebugObject
+805057d0  8057c010 nt!NtSetInformationFile
+805057d4  805d7928 nt!NtSetInformationJobObject
+805057d8  806234a0 nt!NtSetInformationKey
+805057dc  805c57fe nt!NtSetInformationObject
+805057e0  805cee46 nt!NtSetInformationProcess
+805057e4  805cd0ca nt!NtSetInformationThread
+805057e8  805fae60 nt!NtSetInformationToken
+805057ec  80618156 nt!NtSetIntervalProfile
+805057f0  80579e78 nt!NtSetIoCompletion
+805057f4  805d48c0 nt!NtSetLdtEntries
+805057f8  80617c8a nt!NtSetLowEventPair
+805057fc  80617bb2 nt!NtSetLowWaitHighEventPair
+80505800  8057c7de nt!NtSetQuotaInformationFile
+80505804  805c15ea nt!NtSetSecurityObject
+80505808  80617384 nt!NtSetSystemEnvironmentValue
+8050580c  806170ba nt!NtSetSystemEnvironmentValueEx
+80505810  806103ba nt!NtSetSystemInformation
+80505814  80653e18 nt!NtSetSystemPowerState
+80505818  80614b54 nt!NtSetSystemTime
+8050581c  805c92e0 nt!NtSetThreadExecutionState
+80505820  80539d62 nt!NtSetTimer
+80505824  80614026 nt!NtSetTimerResolution
+80505828  80615e9a nt!NtSetUuidSeed
+8050582c  80622d0c nt!NtSetValueKey
+80505830  8057d0f4 nt!NtSetVolumeInformationFile
+80505834  80613644 nt!NtShutdownSystem
+80505838  80527758 nt!NtSignalAndWaitForSingleObject
+8050583c  806183a0 nt!NtStartProfile
+80505840  8061854a nt!NtStopProfile
+80505844  805d5a3e nt!NtSuspendProcess
+80505848  805d58b0 nt!NtSuspendThread
+8050584c  8061876e nt!NtSystemDebugControl
+80505850  805d84bc nt!NtTerminateJobObject
+80505854  805d399e nt!NtTerminateProcess
+80505858  805d3b98 nt!NtTerminateThread
+8050585c  805d5bfe nt!NtTestAlert
+80505860  805360f8 nt!NtTraceEvent
+80505864  806170f2 nt!NtTranslateFilePath
+80505868  805852ce nt!NtUnloadDriver
+8050586c  80623036 nt!NtUnloadKey
+80505870  80623250 nt!NtUnloadKeyEx
+80505874  8057a656 nt!NtUnlockFile
+80505878  805b7e9c nt!NtUnlockVirtualMemory
+8050587c  805b3e14 nt!NtUnmapViewOfSection
+80505880  805fc218 nt!NtVdmControl
+80505884  8064375a nt!NtWaitForDebugEvent
+80505888  805c17a0 nt!NtWaitForMultipleObjects
+8050588c  805c16b6 nt!NtWaitForSingleObject
+80505890  80617b4e nt!NtWaitHighEventPair
+80505894  80617aea nt!NtWaitLowEventPair
+80505898  8057def2 nt!NtWriteFile
+8050589c  8057e4d6 nt!NtWriteFileGather
+805058a0  805a6e78 nt!NtWriteRequestData
+805058a4  805b5394 nt!NtWriteVirtualMemory
+805058a8  80505ad8 nt!NtYieldExecution
+805058ac  80618bc6 nt!NtCreateKeyedEvent
+805058b0  80618cb0 nt!NtOpenKeyedEvent
+805058b4  80618d62 nt!NtReleaseKeyedEvent
+805058b8  80618fbe nt!NtWaitForKeyedEvent
+805058bc  805cc8fe nt!NtQueryPortInformationProcess
+805058c0  0000011c
+805058c4  2c2c2018
+805058c8  44402c40
+805058cc  1818080c
+805058d0  0c040408
+805058d4  08081810
+805058d8  0808040c
+805058dc  080c0404
+805058e0  2004040c
+805058e4  140c1008
+805058e8  0c102c0c
+805058ec  10201c0c
+805058f0  20141038
+805058f4  141c2424
+805058f8  34102010
+805058fc  080c0814
+80505900  04040404
+80505904  0428080c
+80505908  1808181c
+8050590c  1808180c
+80505910  040c080c
+80505914  100c0010
+80505918  10080828
+8050591c  0c08041c
+80505920  00081004
+80505924  0c080408
+80505928  10040828
+8050592c  0c0c0404
+80505930  28240428
+80505934  0c0c0c30
+80505938  0c0c0c18
+8050593c  0c10300c
+80505940  0c0c0c10
+80505944  0c141010
+80505948  180c140c
+8050594c  08081414
+80505950  08080808
+80505954  241c2c04
+80505958  14140814
+8050595c  14141414
+80505960  14080414
+80505964  14141814
+80505968  14240808
+8050596c  100c1414
+80505970  14041014
+80505974  1418180c
+80505978  24180c14
+8050597c  04141824
+80505980  08140c08
+80505984  10080c08
+80505988  08040814
+8050598c  0c08040c
+80505990  0808040c
+80505994  08240c0c
+80505998  040c0808
+8050599c  08100408
+805059a0  14040404
+805059a4  10101014
+805059a8  08101010
+805059ac  04041814
+805059b0  14080c10
+805059b4  08080c0c
+805059b8  18040c1c
+805059bc  04100414
+805059c0  18080404
+805059c4  00080808
+805059c8  04041010
+805059cc  08101408
+805059d0  0c141008
+805059d4  24240404
+805059d8  10001418
+805059dc  0010100c
+805059e0  00000000
+805059e4  cccccccc
+805059e8  cccccccc
+805059ec  b8c0570f
+805059f0  00000040
+805059f4  00412b0f
+805059f8  10412b0f
+805059fc  20412b0f
+80505a00  30412b0f
+80505a04  4840c183
+80505a08  ae0fea75
+80505a0c  244487f8
+80505a10  ff8bc3fc
+80505a14  ec8b5355
+80505a18  8314ec83
+80505a1c  ff51f0e4
+80505a20  4d910815
+80505a24  01f88380
+80505a28  01b90b7d
+80505a2c  ff000000
+80505a30  4d902c15
+80505a34  45895980
+80505a38  04a164fc
+80505a3c  64000000
+80505a40  0124158b
+80505a44  f7fa0000
+80505a48  00020c80
+80505a4c  00000400
+80505a50  803e7500
+80505a54  7400317a
+80505a58  3142c617
+80505a5c  c3200f00
+80505a60  0ff1e383
+80505a64  ae0fc322
+80505a68  15896408
+80505a6c  000005c0
+80505a70  04290ffb
+80505a74  ff72e824
+80505a78  280fffff
+80505a7c  4d8b2404
+80505a80  01f983fc
+80505a84  15ff067d
+80505a88  804d9030 nt!_imp_KfLowerIrql
+80505a8c  5d5be58b
+80505a90  8b51fbc3
+80505a94  f983fc4d
+80505a98  ff067d01
+80505a9c  4d903015
+80505aa0  e58b5980
+80505aa4  00eb5d5b
+80505aa8  8bc03357
+80505aac  0400b9f9
+80505ab0  abf30000
+80505ab4  ccccc35f
+80505ab8  cccccccc
+80505abc  c7ec35ff
+80505ac0  35ff8055
+80505ac4  8055c7e8 nt!KiAmdK6Mtrr
+80505ac8  00008568
+80505acc  d2bee8c0
+80505ad0  ccc3ffff
+80505ad4  cccccccc
+80505ad8  4e883d83
+80505adc  53008055
+80505ae0  000024bb
+80505ae4  a0840f40
+80505ae8  56000000
+80505aec  24a16457
+80505af0  33000001
+80505af4  fff08bc9
+80505af8  4d908815
+80505afc  58468880
+80505b00  0020a164
+80505b04  f88b0000 <Unloaded_serial.sys>+0x6000
+80505b08  00087f83
+80505b0c  b60f1675
+80505b10  00012b8e
+80505b14  42d23300
+80505b18  ffe49fe8
+80505b1c  89c085ff
+80505b20  5d740847
+80505b24  334ebe0f
+80505b28  8b10f983
+80505b2c  408a4446
+80505b30  6f468863
+80505b34  012d46c6
+80505b38  be0f197d
+80505b3c  ca836e46
+80505b40  0fd02bff
+80505b44  036c46be
+80505b48  7dc83bca
+80505b4c  c6c88b02
+80505b50  88006e46
+80505b54  468d334e
+80505b58  cd148d60
+80505b5c  8055df80 nt!KiDispatcherReadyListHead
+80505b60  8904728b
+80505b64  04708910
+80505b68  42890689
+80505b6c  40c03304
+80505b70  0509e0d3
+80505b74  80554e88 nt!KiReadySummary
+80505b78  ffec2fe8
+80505b7c  ebdb33ff
+80505b80  584e8a08
+80505b84  040d0fe8
+80505b88  8b5e5f00
+80505b8c  ccc35bc3
+80505b90  cccccccc
+80505b94  8b55ff8b
+80505b98  107d83ec
+80505b9c  b8077400
+80505ba0  c00000f1
+80505ba4  016a32eb
+80505ba8  03b07be8
+80505bac  75c08400
+80505bb0  00bbb807
+80505bb4  20ebc000
+80505bb8  6a006a56
+80505bbc  0c75ff01
+80505bc0  e80875ff
+80505bc4  00146dc0
+80505bc8  f685f08b
+80505bcc  016a077c
+80505bd0  03b053e8
+80505bd4  5ec68b00
+80505bd8  000cc25d
+80505bdc  cccccccc
+80505be0  ff8bcccc
+80505be4  33ec8b55
+80505be8  040539c0
+80505bec  7580556c
+80505bf0  ff505014
+80505bf4  99680875
+80505bf8  68000000
+80505bfc  000000c2
+80505c00  ff5313e8
+80505c04  1be95dff
+80505c08  cc001544
+80505c0c  cccccccc
+80505c10  8b55ff8b
+80505c14  08458bec
+80505c18  8514408b
+80505c1c  8b0974c0
+80505c20  e8c13440
+80505c24  01e08319
+80505c28  0004c25d
+80505c2c  cccccccc
+80505c30  ff8bcccc
+80505c34  51ec8b55
+80505c38  f8458d51 Ntfs+0x31d51
+80505c3c  fc458d50
+80505c40  9312e850
+80505c44  3d830002
+80505c48  80556c08 nt!KernelVerifier
+80505c4c  ff167501
+80505c50  0fe8fc75
+80505c54  8500154c
+80505c58  f62074c0
+80505c5c  74012040
+80505c60  084d801a
+80505c64  9c05ff80
+80505c68  5680562a
+80505c6c  f6ff3357
+80505c70  74080845
+80505c74  08658319
+80505c78  ff14ebf7
+80505c7c  458b0c75
+80505c80  00800d08
+80505c84  e8500000
+80505c88  00032532
+80505c8c  ff472feb
+80505c90  206afc75
+80505c94  61725768
+80505c98  0c75ff70
+80505c9c  e80875ff
+80505ca0  00155324
+80505ca4  f685f08b
+80505ca8  ff830f75
+80505cac  680a7501
+80505cb0  c000009a
+80505cb4  042353e8
+80505cb8  c68b5f00
+80505cbc  08c2c95e
+80505cc0  cccccc00
+80505cc4  ff8bcccc
+80505cc8  53ec8b55
+80505ccc  bcbf5756
+80505cd0  8b80562b
+80505cd4  2015ffcf
+80505cd8  8b804d91
+80505cdc  598b084d
+80505ce0  0c558b08
+80505ce4  3304e2c1
+80505ce8  10e283d3
+80505cec  f38bd333
+80505cf0  c1085189
+80505cf4  d08a04ee
+80505cf8  e683cf8b
+80505cfc  2415ff01
+80505d00  5f804d91
+80505d04  5b5ec68b
+80505d08  0008c25d
+80505d0c  cccccccc
+80505d10  ff8bcccc
+80505d14  8bec8b55
+80505d18  418b0c4d
+80505d1c  08558b20
+80505d20  04708b56
+80505d24  14788b57
+80505d28  8904e6c1
+80505d2c  50899734
+80505d30  14418b04
+80505d34  5f18413b
+80505d38  830c765e
+80505d3c  d8baffc8
+80505d40  f0805630
+80505d44  ff02c10f
+80505d48  c25d1449
+80505d4c  cccc0008
+80505d50  cccccccc
+80505d54  8b55ff8b
+80505d58  0cec83ec
+80505d5c  5310458b
+80505d60  788b5756
+80505d64  943d3b20
+80505d68  8b805529
+80505d6c  5f8b0845
+80505d70  8b088b14
+80505d74  5d890c45
+80505d78  8b5475fc
+80505d7c  55299815
+80505d80  72c23b80
+80505d84  c8053b08
+80505d88  7680562e
+80505d8c  6c053b10
+80505d90  728055e3
+80505d94  68053b10
+80505d98  778055e3
+80505d9c  5805ff08
+80505da0  eb805629
+80505da4  73c23b2a
+80505da8  5c05ff08
+80505dac  eb805629
+80505db0  84053b1e
+80505db4  7280552d
+80505db8  80053be4
+80505dbc  73805630
+80505dc0  5405ff08
+80505dc4  eb805629
+80505dc8  5005ff06
+80505dcc  25805629
+80505dd0  fffff001
+80505dd4  8b01c883
+80505dd8  14458bf0
+80505ddc  89003883
+80505de0  2a750c75
+80505de4  080c40f6
+80505de8  08890475
+80505dec  758b12eb
+80505df0  33d18b14
+80505df4  b10ff0c0
+80505df8  8bc08516
+80505dfc  0b750c75
+80505e00  0200ce81
+80505e04  34890000
+80505e08  8b7beb8b
+80505e0c  148d1445
+80505e10  8b32898b
+80505e14  18773b30
+80505e18  73f85589
+80505e1c  08773b4b
+80505e20  f13b4676
+80505e24  048d4274
+80505e28  f6188bb3
+80505e2c  137401c3
+80505e30  7402c7f6
+80505e34  ff016a20
+80505e38  56511075
+80505e3c  01e67de8
+80505e40  3910eb00
+80505e44  45750477
+80505e48  8b044f89
+80505e4c  890a8b18
+80505e50  8b08891a
+80505e54  fc5d8bce
+80505e58  8908458b
+80505e5c  0c4f3b08

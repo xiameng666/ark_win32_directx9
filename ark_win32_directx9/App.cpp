@@ -107,5 +107,3 @@ void App::SetDockingWnd(bool* p_open)
 //    free(pInfo); 
 //}
 
-
-

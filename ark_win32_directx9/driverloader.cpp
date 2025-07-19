@@ -1,7 +1,7 @@
 #include "driverloader.h"
 #include <stdio.h>
 
-// #define LOGON
+#define LOGON
 
 void DriverLoader::SetPath()
 {

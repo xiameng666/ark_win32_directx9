@@ -45,6 +45,7 @@
 enum SubView {
     GDT,
     IDT,
+    SSDT,
     PROCESS,
     MEM,
     MODULE,
@@ -67,7 +68,8 @@ struct Context {
     std::vector<PROCESS_INFO> processUiVec;           // 进程列表数据
     std::vector<MODULE_INFO> globalModuleUiVec;       // 全局模块数据
     std::vector<MODULE_INFO> processModuleUiVec;      // 进程模块数据
-    
+    std::vector<SSDT_INFO> ssdtUiVec_;                // SSDT数据
+
     // 进程模块窗口状态
     bool showProcessModuleWnd = false;
     DWORD moduleTargetPid = 0;
@@ -79,6 +81,10 @@ struct Context {
     char sizeText_[16] = "256";         // 大小输入框
     DWORD targetPid_ = 0;
 
+    // SSDT相关状态
+    bool ssdtLoaded_ = false;
+    int selectedSSDTIndex_ = -1;
+    char ssdtSearchFilter_[256] = "";
 
     ArkR3 arkR3;
     SubView currentView;
@@ -96,4 +102,6 @@ public:
     virtual void Render(bool* p_open = nullptr) = 0;
     virtual ~ImguiWnd() = default;
 };
+
+
 

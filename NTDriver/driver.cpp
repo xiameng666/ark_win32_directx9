@@ -2,7 +2,7 @@
 
 ULONG g_TestValue = 0x11223344;
 ULONG g_WindowsVersion = 0;
-BOOLEAN g_LogOn = FALSE;  // 日志开关
+BOOLEAN g_LogOn = true;  // 日志开关
 
 extern "C"
 NTSTATUS NTAPI ZwQuerySystemInformation(
@@ -290,6 +290,21 @@ NTSTATUS DispatchDeviceControl(
     NTSTATUS status = STATUS_INVALID_DEVICE_REQUEST;
     ULONG_PTR info = 0;
     switch (code) {
+    case CTL_ENUM_SSDT:
+    {
+        __try {
+            ULONG ssdtCount = 0;
+            status = GetSSDT((PSSDT_INFO)Irp->AssociatedIrp.SystemBuffer,&ssdtCount);
+            if (NT_SUCCESS(status)) {
+                info = ssdtCount * sizeof(SSDT_INFO);
+                Log("[XM] CTL_ENUM_SSDT: 返回 %d 个SSDT项\n", ssdtCount);
+            }
+        }
+        __except (EXCEPTION_EXECUTE_HANDLER) {
+            status = STATUS_UNSUCCESSFUL;
+        }
+    }
+    break;
     case CTL_ATTACH_MEM_READ:
     {
         PPROCESS_MEM_REQ memReq = (PPROCESS_MEM_REQ)Irp->AssociatedIrp.SystemBuffer;
@@ -584,6 +599,58 @@ NTSTATUS DriverEntry(
     return status;
 }
 
+typedef struct _SYSTEM_SERVICE_DESCRIPTOR_TABLE {
+    PULONG ServiceTableBase;      // 系统服务函数指针数组
+    PULONG ServiceCounterTable;   // 服务调用计数表
+    ULONG NumberOfServices;       // 服务数量
+    PUCHAR ParamTableBase;        // 参数表
+} SYSTEM_SERVICE_DESCRIPTOR_TABLE, * PSYSTEM_SERVICE_DESCRIPTOR_TABLE;
+
+extern "C" PSYSTEM_SERVICE_DESCRIPTOR_TABLE KeServiceDescriptorTable;//win7后不导出？
+
+NTSTATUS GetSSDT(PSSDT_INFO SsdtBuffer, PULONG SsdtCount)
+{
+    NTSTATUS Status = STATUS_SUCCESS;
+    ULONG Count = 0;
+
+    Log("[XM] GetSSDTInfo: 开始获取SSDT信息\n");
+
+    __try {
+        // 获取SSDT表指针
+        PSYSTEM_SERVICE_DESCRIPTOR_TABLE SsdtTable = &KeServiceDescriptorTable[0];
+
+        if (!SsdtTable || !SsdtTable->ServiceTableBase) {
+            Log("[XM] GetSSDT: SSDT表无效\n");
+            return STATUS_UNSUCCESSFUL;
+        }
+
+        Count = SsdtTable->NumberOfServices;
+        Log("[XM] GetSSDT: SSDT服务数量=%d\n", Count);
+
+        if (SsdtBuffer) {
+            // 填充SSDT信息
+            for (ULONG i = 0; i < Count; i++) {
+                SsdtBuffer[i].Index = i;
+                SsdtBuffer[i].FunctionAddress = (PVOID)SsdtTable->ServiceTableBase[i];
+
+                // 函数名后续硬编码或者pdb解析
+                RtlStringCchCopyA(SsdtBuffer[i].FunctionName,
+                    sizeof(SsdtBuffer[i].FunctionName), "Unknown");
+            }
+
+            Log("[XM] GetSSDT: success SSDT项 %d个\n", Count);
+        }
+
+        *SsdtCount = Count;
+
+    }
+    __except (EXCEPTION_EXECUTE_HANDLER) {
+        Log("[XM] GetSSDT  err\n");
+        Status = STATUS_UNSUCCESSFUL;
+    }
+
+    return Status;
+}
 //// 枚举指定进程的模块
 //NTSTATUS EnumProcessModuleEx(HANDLE ProcessId, PMODULE_INFO ModuleBuffer, bool CountOnly, PULONG ModuleCount)
 //{

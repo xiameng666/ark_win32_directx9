@@ -33,6 +33,8 @@ enum WindowsVersion
 #define CTL_ENUM_PROCESS_MODULE_COUNT MY_CTL_CODE(32)   // 枚举进程模块 返回数量
 #define CTL_ENUM_PROCESS_MODULE       MY_CTL_CODE(33)   // 枚举进程模块 返回数据
 
+#define CTL_ENUM_SSDT               MY_CTL_CODE(35)  // 枚举SSDT 返回数据  假定max 500条记录 不要返回数量了
+
 //#define CTL_ENUM_DRIVER_COUNT       MY_CTL_CODE(40)
 //#define CTL_ENUM_DRIVER             MY_CTL_CODE(41)   // 枚举驱动
 //
@@ -125,3 +127,9 @@ typedef struct SegmentDescriptor {
     unsigned g : 1;          // 粒度位 - 新增，突破界限限制
     unsigned Base3 : 8;      // 基址高8位 - 新增，支持32位基址
 }*PSEGDESC;
+
+typedef struct SSDT_INFO {
+    ULONG Index;
+    PVOID FunctionAddress;
+    CHAR FunctionName[64];
+}*PSSDT_INFO;

@@ -6,6 +6,7 @@ KernelWnd::KernelWnd(Context* ctx)
 {
     viewRenderers_[GDT] = [this]() { RenderGDTTable(); };
     viewRenderers_[IDT] = [this]() { RenderIDTTable(); };
+    viewRenderers_[SSDT] = [this]() { RenderSSDTTable(); };
 }
 
 void KernelWnd::Render(bool* p_open)
@@ -33,6 +34,48 @@ void KernelWnd::Render(bool* p_open)
 
     ImGui::End();
 }
+
+void KernelWnd::RenderSSDTTable()
+{
+    // 刷新按钮
+    if (ImGui::Button(u8"刷新")) {
+        ctx_->ssdtUiVec_ = ctx_->arkR3.SSDTGetVec();
+    }
+
+    if (ImGui::BeginTable("SSDT", 3, 
+        ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody |
+        ImGuiTableFlags_ScrollY | ImGuiTableFlags_Resizable)) {
+    
+        // 列表头
+        ImGui::TableSetupColumn(u8"索引", ImGuiTableColumnFlags_WidthFixed, 60);
+        ImGui::TableSetupColumn(u8"函数地址", ImGuiTableColumnFlags_WidthFixed, 120);
+        ImGui::TableSetupColumn(u8"函数名", ImGuiTableColumnFlags_WidthStretch);
+
+
+        ImGui::TableHeadersRow();
+        
+        for (const auto& ssdt : ctx_->ssdtUiVec_) {
+            ImGui::TableNextRow();
+            
+            // 索引
+            ImGui::TableNextColumn();
+            ImGui::Text("%d", ssdt.Index);
+
+            // 函数地址
+            ImGui::TableNextColumn();
+            ImGui::Text("0x%p", ssdt.FunctionAddress);
+
+            // 函数名
+            ImGui::TableNextColumn();
+            ImGui::Text("%s", ssdt.FunctionName);
+    
+
+        }
+    
+        ImGui::EndTable();
+    }
+}
+
 
 void KernelWnd::RenderGDTTable()
 {
@@ -162,6 +205,7 @@ void KernelWnd::RenderLeftBar()
     NAV_SECTION(u8"内存管理",
         VIEW_ITEM(u8"GDT", GDT);
         VIEW_ITEM(u8"IDT", IDT);
+        VIEW_ITEM(u8"SSDT", SSDT);
     );
 }
 

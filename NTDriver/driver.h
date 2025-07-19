@@ -10,6 +10,8 @@
 extern "C" {
     void Log(const char* Format, ...);
 
+    NTSTATUS GetSSDT(PSSDT_INFO SsdtBuffer, PULONG SsdtCount);
+
     NTSTATUS DetectWindowsVersion();
 
     NTSTATUS AttachReadVirtualMem(HANDLE ProcessId, PVOID BaseAddress, PVOID Buffer, unsigned ReadBytes);
@@ -43,6 +45,8 @@ extern "C" {
     NTSTATUS  DriverEntry(
         __in struct _DRIVER_OBJECT* DriverObject,
         __in PUNICODE_STRING  RegistryPath);
+
+    
 
 }
 

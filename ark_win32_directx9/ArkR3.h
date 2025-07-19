@@ -65,5 +65,7 @@ public:
     std::vector<MODULE_INFO> ProcessModuleGetVec(DWORD processId, DWORD moduleCount = 0);
     std::vector<MODULE_INFO> ProcessModuleVec_;
 
+    //SSDT 直接申请了500项的缓冲区
+    std::vector<SSDT_INFO> SSDTGetVec();
+    std::vector<SSDT_INFO> SSDTVec_;
 };
-
